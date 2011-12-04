@@ -1,0 +1,16 @@
+*.swp
+*.swo
+*.bak
+.svn/
+Thumbs.db*
+vd/
+tmp/
+logs/
+.project
+build/
+.modified
+.code_swarm*
+*.orig
+*.*~
+*.log
+.settings/
