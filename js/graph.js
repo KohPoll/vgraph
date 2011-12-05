@@ -158,7 +158,7 @@
                         f: this.dataInfo[idx].f, 
                         l: fToText[this.dataInfo[idx].l - 1]
                     });
-                console.log(this.dataInfo[idx]);
+                //console.log(this.dataInfo[idx]);
                 //console.log(info);
                                 
                 $('<div id="datainfo">')
