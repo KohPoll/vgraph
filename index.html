@@ -59,6 +59,7 @@ $(document).ready(function() {
     $.getJSON('data/poll-data.php?type=full-character', function(resp) {
         var graph = new Graph({
             placeHolder: '#placeHolder',
+            skin: { labelSuffix: '字({count})' },
             data: resp
         });
         graph.render();

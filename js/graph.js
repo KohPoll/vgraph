@@ -13,8 +13,7 @@
         this.data = opts.data || [];
 
         //this.skin = opts.skin || {};
-        this.skin = { };
-        $.extend(true, this.skin, opts.skin || {}, Graph.skin);
+        this.skin = $.extend({}, Graph.skin, opts.skin || {});
 
         this.plot = null;
         this.plotData = null;
@@ -71,7 +70,7 @@
         for (var i=0, len=renderData.length; i<len; ++i) {
             var series = { };
             series['color'] = this.skin.colors[i] || '#333';
-            series['label'] = this.skin.labels[i] || '';
+            series['label'] = (this.skin.labels[i] || '') + this.skin.labelSuffix;
             series['data'] = renderData[i];
 
             plotData.push(series);
