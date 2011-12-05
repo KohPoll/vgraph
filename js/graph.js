@@ -60,12 +60,18 @@
 
     GP._init = function() {
         this._initPlotData();
-
         this._initPlotOpt();
+
+        this._initRangeSelect();
     };
+
     GP._initPlotData = function() {
-        var renderData = Graph.util.normalizeToRenderData(this.data),
-            plotData = this.plotData = [];
+        var renderData = Graph.util.normalizeToRenderData(this.data);
+        this.plotData = this._generatePlotData(renderData);
+    };
+
+    GP._generatePlotData = function(renderData) {
+        var plotData = [];
 
         for (var i=0, len=renderData.length; i<len; ++i) {
             var series = { };
@@ -75,7 +81,10 @@
 
             plotData.push(series);
         }
+
+        return plotData;
     };
+
     GP._initPlotOpt = function() {
         this.plotOpt = {
             series: {
@@ -92,8 +101,29 @@
         };
     };
 
-    GP.render = function() {
-        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
+    GP._initRangeSelect = function() {
+        var self = this;
+
+        self.placeHolder.bind('plotselected', function(evt, ranges) {
+            var from = ranges.xaxis.from, to = ranges.xaxis.to,
+                s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
+
+            console.log(from+','+to+';'+s+','+e);
+            var renderData = Graph.util.sliceToRenderData(self.data, s, e),
+                plotData = self._generatePlotData(renderData),
+                plotOpt = $.extend(true, {}, self.plotOpt, {
+                    xaxis: {min: s, max: e+1}
+                });
+
+            self.render(plotData, plotOpt);
+        });
+    };
+
+    GP.render = function(plotData, plotOpt) {
+        plotData = plotData || this.plotData;
+        plotOpt = plotOpt || this.plotOpt;
+
+        this.plot = $.plot(this.placeHolder, plotData, plotOpt);
     };
 
 
