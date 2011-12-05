@@ -56,7 +56,15 @@
 <script>
 $(document).ready(function() {
 
+    $.getJSON('data/poll-data.php?type=full-character', function(resp) {
+        var graph = new Graph({
+            placeHolder: '#placeHolder',
+            data: resp
+        });
+        graph.render();
+    });
 
+    /*
     var control = $('#J_control'),
         graphCache = {}, graphLevelMapperCache = {},
         drawGraph = function() {
@@ -92,6 +100,7 @@ $(document).ready(function() {
         }
     });
     drawGraph();
+    */
 
     /*
     var graph = new Graph('#placeHolder', '#dataContainer', 'full-word'),

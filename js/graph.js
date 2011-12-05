@@ -1,15 +1,104 @@
 (function($) {
     //console.log($);
 
-    function Graph(placeHolder, dataContainer, type) {
-        this.placeHolder = $(placeHolder);
-        this.dataContainer = $(dataContainer);
-        this.type = type;
+    /*
+     * opts.
+     * placeHolder
+     * data
+     * skin
+     */
+    function Graph(opts) {
+        this.placeHolder = opts.placeHolder && $(placeHolder);
 
-        this.plotData = [];
-        this.plotOpt = {};
+        this.data = opts.data || [];
+
+        //this.skin = opts.skin || {};
+        this.skin = { };
+        $.extend(true, this.skin, opts.skin || {}, Graph.skin);
+
+        this.plot = null;
+        this.plotData = null;
+        this.plotOpt = null;
+
+        this._init();
     };
 
+    Graph.skin = {
+        labelSuffix: '数据',
+        colors: ['red', 'green', 'yellow', 'blue'],
+        labels: ['甲级', '乙级', '丙级', '丁级']
+    };
+
+    Graph.util = {
+        /*
+         * renderData的每一个元素是属于同一类别的数据组成的数组, 
+         * renderData[i] 可取到类别(i+1)的所有数据的坐标([num, freq])
+         * renderData[i].length 可取到类别(i+1)的数据总量
+         * renderData.length 可取到共有多少个类别
+         */
+        normalizeToRenderData: function(data) {
+            var renderData = []; // [ [[num, freq], ...], [[num, freq], ...], ... ]
+
+            if (data && data.length) {
+                for (var i=0, len=data.length; i<len; ++i) {
+                    var item = data[i], // {d:data, f:freq, l:level}
+                        l = item.l, f = item.f;
+
+                    (typeof renderData[l - 1] === 'undefined') && (renderData[l - 1] = []);
+                    renderData[l - 1].push([(i + 1), f]);
+                }
+            }
+
+            return renderData;
+        },
+        sliceToRenderData: function(data, start, end) {
+            var sliceData = data.slice(start, end);
+            return this.normalizeToRenderData(sliceData);
+        }
+    };
+
+    var GP = Graph.prototype;
+
+    GP._init = function() {
+        this._initPlotData();
+
+        this._initPlotOpt();
+    };
+    GP._initPlotData = function() {
+        var renderData = Graph.util.normalizeToRenderData(this.data),
+            plotData = this.plotData = [];
+
+        for (var i=0, len=renderData.length; i<len; ++i) {
+            var series = { };
+            series['color'] = this.skin.colors[i] || '#333';
+            series['label'] = this.skin.labels[i] || '';
+            series['data'] = renderData[i];
+
+            plotData.push(series);
+        }
+    };
+    GP._initPlotOpt = function() {
+        this.plotOpt = {
+            series: {
+                lines: { show: true },
+                points: { show: true }
+            },
+            grid: {
+                hoverable: true,
+                clickable: true
+            },
+            selection: {
+                mode: 'x'
+            }
+        };
+    };
+
+    GP.render = function() {
+        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
+    };
+
+
+/*
     Graph.prototype.renderPlot = function() {
         this.initPlotData();
         this.initPlotOpt();
@@ -126,9 +215,6 @@
         $('#graph').append(yTip).append(xTip);
     };
 
-    Graph.prototype.renderData = function(data) {
-        this.dataContainer.html(data);
-    };
     
     Graph.prototype.hoverTip = function() {
         var prevPoint = null, self = this,
@@ -257,6 +343,7 @@
         var rst = sliceFrArr(this.plotData, s, e);
         return rst;
     };
+*/
 
 
     window.Graph = Graph;
