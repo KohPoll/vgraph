@@ -183,11 +183,14 @@
 
         var range = this.levelToRange[levelIndex];
 
+        /*
         if (levelIndex !== 0) {
             this._updateRange(range[0], range[1]);
         } else { //为0画全局，直接渲染，不update range
             this._render(null, $.extend(true, {}, this.plotOpt, {xaxis: {min: range[0], max: range[1]}}));
         }
+        */
+        this._updateRange(range[0], range[1]);
     };
 
     GP._initCoordsInfo = function() {
