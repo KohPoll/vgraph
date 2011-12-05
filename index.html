@@ -56,13 +56,28 @@
 <script>
 $(document).ready(function() {
 
+    var graph, 
+        drawGraph = function(graph) {
+            var level = $(':checked')[1].value;
+            graph.renderByLevel(parseInt(level, 10));
+        };
+
     $.getJSON('data/poll-data.php?type=full-character', function(resp) {
         var graph = new Graph({
             placeHolder: '#placeHolder',
             skin: { labelSuffix: '字({count})' },
-            data: resp
+            data: { value: resp }
         });
-        graph.render();
+        //graph.render();
+
+        var control = $('#J_control');
+        control.bind('click', function(evt) {
+            var target = evt.target;
+            if (target.tagName === 'INPUT') {
+                drawGraph(graph);
+            }
+        });
+        drawGraph(graph);
     });
 
     /*

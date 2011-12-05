@@ -1,80 +1,140 @@
 (function($) {
-    //console.log($);
 
     /*
      * opts.
-     * placeHolder
-     * data
-     * skin
+     *  placeHolder
+     *  data
+     *  skin
      */
     function Graph(opts) {
+        // 画布的容器
         this.placeHolder = opts.placeHolder && $(placeHolder);
 
-        this.data = opts.data || [];
+        // data结构 (见下Graph.data)
+        this.data = $.extend({}, Graph.data, opts.data || {});
 
-        //this.skin = opts.skin || {};
+        // skin结构 (见下Graph.skin)
         this.skin = $.extend({}, Graph.skin, opts.skin || {});
 
+        // plot实例
         this.plot = null;
+        // plot渲染用数据
         this.plotData = null;
+        // plot渲染用配置
         this.plotOpt = null;
+
+        //每级别的数据总量,第0个元素代表总数据量 [amount, amount1, amount2, ... ]
+        this.levelData = null; 
+        //每级别在坐标上的对应区域,第0个元素代表整个区域 [[b,e], [b,e], ... ] 
+        this.levelToRange = null;  
 
         this._init();
     };
 
     Graph.skin = {
-        labelSuffix: '数据',
-        colors: ['red', 'green', 'yellow', 'blue'],
-        labels: ['甲级', '乙级', '丙级', '丁级']
+        labelSuffix: '数据', //label后缀,可使用模板
+        colors: ['red', 'green', 'yellow', 'blue'], //分块数据的color，和类别对应
+        labels: ['甲级', '乙级', '丙级', '丁级'], //分块数据的label，和类别对应
+        coords: ['编 号', '频<br/>数']
+    };
+    Graph.data = {
+        value: [], //实际数据
+        level: 4  //数据类别
     };
 
     Graph.util = {
+        toNestedArray: function(n) { // [[], [], ...,]共n个
+            var rst = [];
+            for (var i=0; i<n; ++i) {
+                rst[i] = [];
+            }
+            return rst;
+        },
         /*
          * renderData的每一个元素是属于同一类别的数据组成的数组, 
          * renderData[i] 可取到类别(i+1)的所有数据的坐标([num, freq])
-         * renderData[i].length 可取到类别(i+1)的数据总量
-         * renderData.length 可取到共有多少个类别
+         * renderData[i].length 可取到已渲染出来的类别(i+1)的数据总量
          */
-        normalizeToRenderData: function(data) {
-            var renderData = []; // [ [[num, freq], ...], [[num, freq], ...], ... ]
+        normalizeToRenderData: function(data, startIndex) { // data: {value, level}
+            var dataValue = data.value, dataLevel = data.level,
+                startIndex = startIndex || 0,
+                renderData = this.toNestedArray(dataLevel); // [ [[num, freq], ...], [[num, freq], ...], ... ]
 
-            if (data && data.length) {
-                for (var i=0, len=data.length; i<len; ++i) {
-                    var item = data[i], // {d:data, f:freq, l:level}
+            if (dataValue && dataValue.length) {
+                for (var i=0, len=dataValue.length; i<len; ++i) {
+                    var item = dataValue[i], // {d:data, f:freq, l:level}
                         l = item.l, f = item.f;
 
-                    (typeof renderData[l - 1] === 'undefined') && (renderData[l - 1] = []);
-                    renderData[l - 1].push([(i + 1), f]);
+                    renderData[l - 1].push([(startIndex + 1), f]);
+                    startIndex += 1;
                 }
             }
 
             return renderData;
         },
         sliceToRenderData: function(data, start, end) {
-            var sliceData = data.slice(start, end);
-            return this.normalizeToRenderData(sliceData);
+            var sliceData = data.value.slice(start - 1, end);
+            return this.normalizeToRenderData({value: sliceData, level: data.level}, start - 1);
         }
     };
 
     var GP = Graph.prototype;
 
     GP._init = function() {
-        this._initPlotData();
+        this._initData();
+
         this._initPlotOpt();
 
         this._initRangeSelect();
+
+        this._initHoverTip();
+
+        this._initCoordsInfo();
     };
 
-    GP._initPlotData = function() {
+    GP._initData = function() {
         var renderData = Graph.util.normalizeToRenderData(this.data);
+
+        // init plotData
         this.plotData = this._generatePlotData(renderData);
+
+        // init levelData
+        this.levelData = this._generateLevelData(renderData);
+
+        // init levelToRange
+        this.levelToRange = this._generateLevelToRange(this.levelData);
     };
 
-    GP._generatePlotData = function(renderData) {
+    GP._generateLevelToRange = function(levelData) {
+        var rst = [-1], s = e = 0;
+
+        for (var i=1, len=levelData.length; i<len; ++i) {
+            e = s + levelData[i];
+            rst.push([s + 1, e]);
+            s = e;
+        }
+        rst[0] = [1, e];
+
+        return rst;
+    };
+
+    GP._generateLevelData = function(renderData) { 
+        var levelData = [this.data.value.length];
+
+        for (var i=0, len=renderData.length; i<len; ++i) {
+            levelData.push(renderData[i].length);
+        }
+
+        return levelData;
+    };
+
+    GP._generatePlotData = function(renderData) { 
         var plotData = [];
 
         for (var i=0, len=renderData.length; i<len; ++i) {
-            var series = { };
+            var series = { }, renderSerieData = renderData[i];
+            if (renderSerieData.length === 0) continue;
+
             series['color'] = this.skin.colors[i] || '#333';
             series['label'] = (this.skin.labels[i] || '') + this.skin.labelSuffix;
             series['data'] = renderData[i];
@@ -101,6 +161,56 @@
         };
     };
 
+    GP._updateRange = function(s, e) {
+        var renderData = Graph.util.sliceToRenderData(this.data, s, e),
+            plotData = this._generatePlotData(renderData),
+            plotOpt = $.extend(true, {}, this.plotOpt, {
+                xaxis: {min: s, max: e}
+            });
+
+        this._render(plotData, plotOpt);
+    };
+
+    GP._render = function(plotData, plotOpt) {
+        plotData = plotData || this.plotData;
+        plotOpt = plotOpt || this.plotOpt;
+
+        this.plot = $.plot(this.placeHolder, plotData, plotOpt);
+    };
+
+    GP.renderByLevel = function(levelIndex) { // 0,1,2,3,..., level
+        levelIndex = levelIndex || 0;
+
+        var range = this.levelToRange[levelIndex];
+
+        if (levelIndex !== 0) {
+            this._updateRange(range[0], range[1]);
+        } else { //为0画全局，直接渲染，不update range
+            this._render(null, $.extend(true, {}, this.plotOpt, {xaxis: {min: range[0], max: range[1]}}));
+        }
+    };
+
+    GP._initCoordsInfo = function() {
+        var yInfo, xInfo,
+            placeHolder = this.placeHolder, container = this.placeHolder.parent(),
+            fix = 15, height = placeHolder.height();
+
+        xInfo = $('<p>').css({
+                            position: 'absolute',
+                            right: fix,
+                            top: height - fix
+                        }).html(this.skin.coords[0]),
+
+        yInfo = $('<p>').css({
+                            position: 'absolute',
+                            left: 0,
+                            top: -fix
+                        }).html(this.skin.coords[1]);
+
+        container.css({position: 'relative'})
+                 .append(yInfo).append(xInfo);
+    };
+    
     GP._initRangeSelect = function() {
         var self = this;
 
@@ -109,142 +219,30 @@
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
             console.log(from+','+to+';'+s+','+e);
-            var renderData = Graph.util.sliceToRenderData(self.data, s, e),
-                plotData = self._generatePlotData(renderData),
-                plotOpt = $.extend(true, {}, self.plotOpt, {
-                    xaxis: {min: s, max: e+1}
-                });
-
-            self.render(plotData, plotOpt);
+            self._updateRange(s, e);
         });
     };
 
-    GP.render = function(plotData, plotOpt) {
-        plotData = plotData || this.plotData;
-        plotOpt = plotOpt || this.plotOpt;
+    GP._initHoverTip = function() {
+        var self = this,
+            prevPoint = null;
 
-        this.plot = $.plot(this.placeHolder, plotData, plotOpt);
+        self.placeHolder.bind('plothover', function(evt, pos, item) {
+            if (item) {
+                if (prevPoint !== item.dataIndex) {
+                    prevPoint = item.dataIndex;
+                    
+                    console.log(item);
+                }
+            } else {
+                prevPoint = null;
+            }
+        });
     };
 
 
 /*
-    Graph.prototype.renderPlot = function() {
-        this.initPlotData();
-        this.initPlotOpt();
-
-        this.initLevelMapper();
-
-        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
-    };
-
-    Graph.prototype.rerenderPlot = function() {
-        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
-    };
-
-    Graph.prototype.initLevelMapper = function() {
-        var levelInterval = [0], 
-            plotData = this.plotData, 
-            levelMapper, self = this;
-
-        for (var i=0, levelCount=plotData.length; i<levelCount; ++i) {
-            var next = levelInterval[levelInterval.length - 1] + plotData[i].data.length;
-            levelInterval.push(next);
-        }
-
-        levelMapper = [
-                function() {
-                    var len = levelInterval.length;
-                    self.updateRange(levelInterval[0], levelInterval[len - 1] - 1);
-                },
-                function() {
-                    self.updateRange(levelInterval[0], levelInterval[1] - 1);
-                },
-                function() {
-                    self.updateRange(levelInterval[1], levelInterval[2] - 1);
-                },
-                function() {
-                    self.updateRange(levelInterval[2], levelInterval[3] - 1);
-                },
-                function() {
-                    self.updateRange(levelInterval[3], levelInterval[4] - 1);
-                }
-            ];
-        
-        this.levelMapper = levelMapper;
-    };
-
-    Graph.prototype.initPlotData = function() {
-        var color = ['red', 'blue', 'green', 'yellow'], 
-            level = ['甲', '乙', '丙', '丁'],
-            i = 0, j = 0, len, item, 
-            plotData = this.plotData, dataInfo = this.dataInfo;
-
-        if (dataInfo && dataInfo.length) {
-            for (i=0, len=dataInfo.length; i<len; ++i) {
-                item = dataInfo[i];
-
-                // 按聚类级别的数据
-                if (typeof plotData[item.l - 1] === 'undefined') {
-                    plotData[item.l - 1] = {};
-
-                    plotData[item.l - 1]['data'] = [];
-                    plotData[item.l - 1]['data'].push([(i + 1), item.f]);
-                } else {
-                    plotData[item.l - 1]['data'].push([(i + 1), item.f]);
-                }
-            }
-
-            for (i=0, len=plotData.length; i<len; ++i) {
-                item = plotData[i];
-                item.color = color[i];
-                item.label = level[i] + this.getLabelTailByType() + '(' + item.data.length + '个)';
-            }
-        } 
-    };
-    Graph.prototype.getLabelTailByType = function() {
-        var typeToLabelTail = {
-            'full-character': '级字',
-            'full-word': '级词',
-        };
-
-        return typeToLabelTail[this.type];
-    };
-
-    Graph.prototype.initPlotOpt = function() {
-        this.plotOpt = {
-            series: {
-                lines: { show: true },
-                points: { show: true }
-            },
-            grid: {
-                hoverable: true,
-                clickable: true
-            },
-            selection: {
-                mode: 'x'
-            }
-        };
-    };
-
-    Graph.prototype.render = function(data) {
-        this.dataInfo = data; //按编号的数据,缓存
-
-        this.hoverTip();
-        this.rangeSelect();
-
-        this.renderPlot();
-
-        this.renderAxeTip();
-    };
-
-    Graph.prototype.renderAxeTip = function() {
-        var yTip = $('<p class="y-desp">').html('频<br/>数'),
-            xTip = $('<p class="x-desp">').html('编 号');
-
-        $('#graph').append(yTip).append(xTip);
-    };
-
-    
+ *
     Graph.prototype.hoverTip = function() {
         var prevPoint = null, self = this,
             placeHolder = this.placeHolder,
@@ -294,86 +292,7 @@
             }
         });
     };
-
-    Graph.prototype.rangeSelect = function() {
-        var self = this;
-
-        this.placeHolder.bind('plotselected', function(evt, ranges) {
-            var from = ranges.xaxis.from, to = ranges.xaxis.to,
-                s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
-
-            self.updateRange(s, e);
-        });
-    };
-
-    Graph.prototype.updateRange = function(s, e) {
-        var self = this;
-        var newPlotData = self.updatePlotData(s, e);
-
-        self.plotOpt = $.extend(true, {}, self.plotOpt, {
-            xaxis: {min: s, max: e+1}
-        });
-
-        self.plot = $.plot(self.placeHolder, newPlotData, self.plotOpt);
-    };
-
-    Graph.prototype.updatePlotData = function(s, e) {
-        var sliceFrArr = function (arr, head, tail) {
-            var length_total = 0;
-            var length_array = [];
-            for (item in arr)
-            {
-                length_total += arr[item].data.length;
-                length_array.push(length_total);
-            }
-
-            var re_arr = [];
-            var cur_position = function(head) { 
-                for (var i = 0; i < length_array.length; i++)
-                {
-                    if (head < length_array[i])
-                    {
-                        return i;
-                    }
-                }	
-            };
-            var cur_obj = cur_position(head);	
-            var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
-            for (var i = head; i <= tail; i++)
-            {
-                if (i >= length_array[cur_obj]) {
-                    cur_obj += 1;
-
-                    if (tmp_obj.data.length != 0)
-                    {
-                        re_arr.push(tmp_obj);
-                        tmp_obj = { data: [] };
-                        tmp_obj.color = arr[cur_obj].color;
-                        tmp_obj.label = arr[cur_obj].label;
-                    }
-                }
-
-                var offset = 0;
-                if (cur_obj > 0) { offset = i - length_array[cur_obj - 1]; }
-                else { offset = i; }
-
-                tmp_obj.data.push(arr[cur_obj].data[offset]);
-
-                if (i == tail) 
-                {	
-                    re_arr.push(tmp_obj);
-                    break;
-                }
-            }
-
-            return re_arr;
-        };
-
-        var rst = sliceFrArr(this.plotData, s, e);
-        return rst;
-    };
 */
-
 
     window.Graph = Graph;
 })(jQuery);
