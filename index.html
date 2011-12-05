@@ -24,15 +24,15 @@
 
         <div class="control" id="J_control">
             <p>
-                <input type="radio" name="type" value="full-word" checked="checked" />词频(全文)统计
-                <input type="radio" name="type" value="full-character" />字频(全文)统计
+				<label title=""><input type="radio" name="type" value="full-word" checked="checked" />词频(全文)统计</label>
+             	<label title=""><input type="radio" name="type" value="full-character" />字频(全文)统计</label>
             </p>
             <p>
-                <input type="radio" name="level" value="0" checked="checked" />全图
-                <input type="radio" name="level" value="1" />甲级细节图
-                <input type="radio" name="level" value="2" />乙级细节图
-                <input type="radio" name="level" value="3" />丙级细节图
-                <input type="radio" name="level" value="4" />丁级细节图
+              	<label title=""><input type="radio" name="level" value="0" checked="checked" />全图</label>
+               	<label title=""><input type="radio" name="level" value="1" />甲级细节图</label>
+              	<label title=""><input type="radio" name="level" value="2" />乙级细节图</label>
+                <label title=""><input type="radio" name="level" value="3" />丙级细节图</label>
+                <label title=""><input type="radio" name="level" value="4" />丁级细节图</label>
             </p>
         </div>
 
@@ -42,7 +42,7 @@
             <br/><br/><br/><br/><br/><br/>
         </div>
 
-        <div id="side">
+       <div id="side">
             <div id="dataContainer"></div>
         </div>
 
@@ -93,46 +93,7 @@ $(document).ready(function() {
     });
     drawGraph();
 
-    /*
-    var graph = new Graph('#placeHolder', '#dataContainer', 'full-word'),
-        plotData = graph.plotData;
-
-    graph.render();
-
-    $('#J_level').bind('change', function(evt) {
-        var $this = $(this),
-            level = $this.val(),
-            levelInterval = (function() {
-                var rst = [0];
-                for (var i=0, levelCount=plotData.length; i<levelCount; ++i) {
-                    var next = rst[rst.length - 1] + plotData[i].data.length;
-                    rst.push(next);
-                }
-                return rst;
-            })(),            
-            levelMapper = {
-                levall: function() {
-                    var len = levelInterval.length;
-                    graph.updateRange(levelInterval[0], levelInterval[len - 1] - 1);
-                },
-                levone: function() {
-                    graph.updateRange(levelInterval[0], levelInterval[1] - 1);
-                },
-                levtwo: function() {
-                    graph.updateRange(levelInterval[1], levelInterval[2] - 1);
-                },
-                levthree: function() {
-                    graph.updateRange(levelInterval[2], levelInterval[3] - 1);
-                },
-                levfour: function() {
-                    graph.updateRange(levelInterval[3], levelInterval[4] - 1);
-                }
-            };
-
-        levelMapper[level]();
     });
-    */
-});
 </script>
 </body>
 </html>

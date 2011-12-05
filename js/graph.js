@@ -56,7 +56,7 @@
     };
 
     Graph.prototype.initPlotData = function() {
-        var color = ['red', 'blue', 'green', 'yellow'], 
+        var color = ['lightcoral', 'lightblue', 'lightgreen', 'sandybrown'], 
             level = ['甲', '乙', '丙', '丁'],
             i = 0, j = 0, len, item, 
             plotData = this.plotData, dataInfo = this.dataInfo;
@@ -144,8 +144,8 @@
                         '<li><em>内容: </em>{d}</li>' +
                         '<li><em>频数: </em>{f}</li>' +
                         '<li><em>级别: </em>{l}</li></ul>',
+            fToText = ['甲', '乙', '丙', '丁'],
             showDataInfo = function(mouseX, mouseY, num, bgColor) {
-                var fToText = ['甲', '乙', '丙', '丁'];
                 var idx = parseInt(num) - 1;
                 var info = tmpl(tmplStr, {
                         n: num, 
@@ -162,7 +162,45 @@
                         top: mouseY - 20,
                         left: mouseX + 5
                     }).appendTo('body').fadeIn(200);
-            };
+            },
+			clearDataRangeList = function ()
+			{
+				if ($('#data-table')) 
+				{
+					$('#data-table').fadeOut("slow");
+					$('#data-table').remove();
+				}
+			},
+			showDataRangeList = function(center, radius) 
+			{
+				clearDataRangeList();
+				// console.log(self.dataInfo);
+				var show_data = self.getRangeByCenter(self.dataInfo, center, radius);
+				var generateTable = function (data)
+				{
+					var table_body = '';
+					for (var index in data)
+					{
+						var obj = data[index];
+						table_body += '<tr><td>' + [obj.d, obj.f, fToText[obj.l - 1]].join('</td><td>') + '</td></tr>'; 
+					}
+					
+					// console.log(str);
+					var table_head = '<tr><th>' + ['词汇', '词频', '词级'].join('</th><th>') + '</th></tr>';
+
+					return '<table>' + table_head + table_body + '</table>';
+				}
+
+				table_html = generateTable(show_data);
+				$('<div id="data-table">')
+					.html(table_html)
+					.appendTo('#dataContainer')
+					.fadeIn("slow");
+			}
+			hiddenDataRangeList = function ()
+			{
+				$('#dataContainer').html('');
+			};
 
         placeHolder.bind('plothover', function(evt, pos, item) {
             if (item) {
@@ -172,9 +210,13 @@
                     $('#datainfo').remove();
                     var num = item.datapoint[0]; //编号
                     showDataInfo.apply(self, [item.pageX, item.pageY, num, item.series.color]);
+				
+					// console.log(item);	
+					showDataRangeList(num, 5);
                 }
             } else {
                 $('#datainfo').remove();
+				// hiddenDataRangeList();
                 prevPoint = null;
             }
         });
@@ -258,6 +300,35 @@
         return rst;
     };
 
+	Graph.prototype.getRangeByCenter = function (coordinate, center, radius)
+	{
+		radius = radius || 5;
+
+		var computeHeadAndTail = function (center) {
+			var head = center - radius - 1;
+			var tail = center + radius - 1;
+
+			if (head < 0) { head = 0; }
+			if (tail > coordinate.length) 
+			{
+				tail = coordinate.length - 1;
+			}
+
+			return { 'head': head, 'tail': tail };
+		}
+
+		var head_tail = computeHeadAndTail(center);
+		// console.log(head_tail);
+		
+		var ret_arr = [];	
+
+		for(var i = head_tail.head; i <= head_tail.tail; i++)
+		{
+			ret_arr.push(coordinate[i]);
+		}
+
+		return ret_arr;	
+	}
 
     window.Graph = Graph;
 })(jQuery);

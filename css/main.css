@@ -22,7 +22,7 @@ button, input, select, textarea {
 #side {
     float: right;
     width: 210px;
-    height: 50px;
+    /* height: 50px; */
     margin-top: 7px;
     border: 1px solid #333;
 }
@@ -79,4 +79,12 @@ button, input, select, textarea {
     left: 0;
     top: 0;
     background: url(../image/loading.gif);
+}
+
+#dataContainer th {
+	width: 80px;
+}
+
+#data-table {
+	display: none;
 }
