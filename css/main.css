@@ -39,7 +39,7 @@ button, input, select, textarea {
     top: 160px;
 }
 
-.act {
+.control {
     margin: 0 0 10px 25px;
 }
 
@@ -65,9 +65,18 @@ button, input, select, textarea {
     padding: 5px; 
 }
 #datainfo ul li {
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 #datainfo em {
     font-style: normal;
     text-align: right;
+}
+
+.preload {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: url(../image/loading.gif);
 }

@@ -9,6 +9,12 @@
 
     <!-- boptionse lib -->
     <script src="js/lib/jquery.js"></script>
+
+
+    <!--[if lte IE 8]>
+    <script src="js/lib/excanvas.min.js"></script>
+    <![endif]-->
+
     <!-- flot lib -->
     <script src="js/lib/flot/jquery.flot.js"></script>
     <script src="js/lib/flot/jquery.flot.selection.js"></script>
@@ -36,22 +42,20 @@ $typeToDesp = array(
             <p>选择显示范围:
             <select id="J_level">
                 <option title="全图" value="levall">全图</option>
-                <option title="一级<?php echo $typeToDesp[$type]; ?>细节图" value="levone">
-                    一级<?php echo $typeToDesp[$type]; ?>细节图</option>
-                <option title="二级<?php echo $typeToDesp[$type]; ?>细节图" value="levtwo">
-                    二级<?php echo $typeToDesp[$type]; ?>细节图</option>
-                <option title="三级<?php echo $typeToDesp[$type]; ?>细节图" value="levthree">
-                    三级<?php echo $typeToDesp[$type]; ?>细节图</option>
-                <option title="四级<?php echo $typeToDesp[$type]; ?>细节图" value="levfour">
-                    四级<?php echo $typeToDesp[$type]; ?>细节图</option>
+                <option title="甲级<?php echo $typeToDesp[$type]; ?>细节图" value="levone">
+                    甲级<?php echo $typeToDesp[$type]; ?>细节图</option>
+                <option title="乙级<?php echo $typeToDesp[$type]; ?>细节图" value="levtwo">
+                    乙级<?php echo $typeToDesp[$type]; ?>细节图</option>
+                <option title="丙级<?php echo $typeToDesp[$type]; ?>细节图" value="levthree">
+                    丙级<?php echo $typeToDesp[$type]; ?>细节图</option>
+                <option title="丁级<?php echo $typeToDesp[$type]; ?>细节图" value="levfour">
+                    丁级<?php echo $typeToDesp[$type]; ?>细节图</option>
             </select>。还可以使用鼠标拖拽框选范围(按住鼠标左键，移动鼠标以框选范围)。
             </p>
         </div>
 
         <div id="graph">
             <div id="placeHolder"></div>
-            <p class="y-desp">频<br/>数</p>
-            <p class="x-desp">编号</p>
         </div>
 
         <div id="side">

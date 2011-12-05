@@ -6,30 +6,64 @@
         this.dataContainer = $(dataContainer);
         this.type = type;
 
-        this.baseUrl = 'data/poll-data.php';
-
         this.plotData = [];
         this.plotOpt = {};
     };
 
-    Graph.prototype.renderPlot = function(renderData) {
-        this.initPlotData(renderData);
+    Graph.prototype.renderPlot = function() {
+        this.initPlotData();
         this.initPlotOpt();
+
+        this.initLevelMapper();
 
         this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
     };
 
-    Graph.prototype.initPlotData = function(resp) {
-        this.dataInfo = resp; //按编号的数据
+    Graph.prototype.rerenderPlot = function() {
+        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
+    };
 
+    Graph.prototype.initLevelMapper = function() {
+        var levelInterval = [0], 
+            plotData = this.plotData, 
+            levelMapper, self = this;
+
+        for (var i=0, levelCount=plotData.length; i<levelCount; ++i) {
+            var next = levelInterval[levelInterval.length - 1] + plotData[i].data.length;
+            levelInterval.push(next);
+        }
+
+        levelMapper = [
+                function() {
+                    var len = levelInterval.length;
+                    self.updateRange(levelInterval[0], levelInterval[len - 1] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[0], levelInterval[1] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[1], levelInterval[2] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[2], levelInterval[3] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[3], levelInterval[4] - 1);
+                }
+            ];
+        
+        this.levelMapper = levelMapper;
+    };
+
+    Graph.prototype.initPlotData = function() {
         var color = ['red', 'blue', 'green', 'yellow'], 
             level = ['甲', '乙', '丙', '丁'],
             i = 0, j = 0, len, item, 
-            plotData = this.plotData;
+            plotData = this.plotData, dataInfo = this.dataInfo;
 
-        if (resp && resp.length) {
-            for (i=0, len=resp.length; i<len; ++i) {
-                item = resp[i];
+        if (dataInfo && dataInfo.length) {
+            for (i=0, len=dataInfo.length; i<len; ++i) {
+                item = dataInfo[i];
 
                 // 按聚类级别的数据
                 if (typeof plotData[item.l - 1] === 'undefined') {
@@ -64,8 +98,6 @@
                 lines: { show: true },
                 points: { show: true }
             },
-            xaxis: {
-            },
             grid: {
                 hoverable: true,
                 clickable: true
@@ -76,16 +108,22 @@
         };
     };
 
-    Graph.prototype.render = function() {
-        var reqUrl = this.baseUrl + '?type=' + this.type,
-            self = this;
+    Graph.prototype.render = function(data) {
+        this.dataInfo = data; //按编号的数据,缓存
 
-        $.getJSON(reqUrl, function(resp) {
-            self.hoverTip();
-            self.rangeSelect();
+        this.hoverTip();
+        this.rangeSelect();
 
-            self.renderPlot(resp);
-        });
+        this.renderPlot();
+
+        this.renderAxeTip();
+    };
+
+    Graph.prototype.renderAxeTip = function() {
+        var yTip = $('<p class="y-desp">').html('频<br/>数'),
+            xTip = $('<p class="x-desp">').html('编 号');
+
+        $('#graph').append(yTip).append(xTip);
     };
 
     Graph.prototype.renderData = function(data) {
@@ -106,7 +144,7 @@
                         '<li><em>内容: </em>{d}</li>' +
                         '<li><em>频数: </em>{f}</li>' +
                         '<li><em>级别: </em>{l}</li></ul>',
-            showDataInfo = function(mouseX, mouseY, num) {
+            showDataInfo = function(mouseX, mouseY, num, bgColor) {
                 var fToText = ['甲', '乙', '丙', '丁'];
                 var idx = parseInt(num) - 1;
                 var info = tmpl(tmplStr, {
@@ -120,7 +158,8 @@
                 $('<div id="datainfo">')
                     .html(info)
                     .css({
-                        top: mouseY + 5,
+                        backgroundColor: bgColor,
+                        top: mouseY - 20,
                         left: mouseX + 5
                     }).appendTo('body').fadeIn(200);
             };
@@ -132,7 +171,7 @@
 
                     $('#datainfo').remove();
                     var num = item.datapoint[0]; //编号
-                    showDataInfo.apply(self, [item.pageX, item.pageY, num]);
+                    showDataInfo.apply(self, [item.pageX, item.pageY, num, item.series.color]);
                 }
             } else {
                 $('#datainfo').remove();
