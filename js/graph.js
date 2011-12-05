@@ -248,9 +248,10 @@
         var sliceFrArr = function (arr, head, tail) {
             var length_total = 0;
             var length_array = [];
-            for (item in arr)
+            for (var i=0, len=arr.length; i<len; ++i)
             {
-                length_total += arr[item].data.length;
+                var item = arr[i];
+                length_total += item.data.length;
                 length_array.push(length_total);
             }
 
