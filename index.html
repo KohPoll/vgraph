@@ -24,8 +24,13 @@
 
         <div class="control" id="J_control">
             <p>
-				<label title=""><input type="radio" name="type" value="full-word" checked="checked" />词频(全文)统计</label>
-             	<label title=""><input type="radio" name="type" value="full-character" />字频(全文)统计</label>
+				<label title=""><input type="radio" name="type" value="full-word" checked="checked" />词频(全文)</label>
+                <!--<label title=""><input type="radio" name="type" value="full-character" />字频(全文)统计</label>-->
+                <label title=""><input type="radio" name="type" value="noncharacteristic-word" />无词性词(总表)</label>
+                <label title=""><input type="radio" name="type" value="noncharacteristic-word-mainland" />无词性词(大陆)</label>
+                <label title=""><input type="radio" name="type" value="noncharacteristic-word-HMT" />无词性词(港澳台)</label>
+                <label title=""><input type="radio" name="type" value="noncharacteristic-word-JK" />无词性词(日韩)</label>
+                <label title=""><input type="radio" name="type" value="noncharacteristic-word-other" />无词性词(其他)</label>
             </p>
             <p>
               	<label title=""><input type="radio" name="level" value="0" checked="checked" />全图</label>
@@ -49,13 +54,12 @@
         <br style="clear:both;" />
     </div>
 
-    <div class="preload"></div>
+    <!--<div class="preload"></div>-->
 
     <script src="js/graph.js"></script>
 
 <script>
 $(document).ready(function() {
-
 
     var control = $('#J_control'),
         graphCache = {}, graphLevelMapperCache = {},
@@ -93,7 +97,7 @@ $(document).ready(function() {
     });
     drawGraph();
 
-    });
+});
 </script>
 </body>
 </html>

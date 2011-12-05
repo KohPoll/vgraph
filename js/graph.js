@@ -87,6 +87,11 @@
         var typeToLabelTail = {
             'full-character': '级字',
             'full-word': '级词',
+            'noncharacteristic-word': '级无词性词',
+            'noncharacteristic-word-mainland': '级无词性词(大陆)',
+            'noncharacteristic-word-HMT': '级无词性词(港澳台)',
+            'noncharacteristic-word-JK': '级无词性词(日韩)',
+            'noncharacteristic-word-other': '级无词性词(其他)'
         };
 
         return typeToLabelTail[this.type];
@@ -153,6 +158,7 @@
                         f: this.dataInfo[idx].f, 
                         l: fToText[this.dataInfo[idx].l - 1]
                     });
+                console.log(this.dataInfo[idx]);
                 //console.log(info);
                                 
                 $('<div id="datainfo">')

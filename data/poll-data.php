@@ -1,12 +1,17 @@
 <?php
 $typeMapper = array(
     "full-character" => "full-character-freq.csv",
-    "full-word" => "full-word-freq.csv"
+    "full-word" => "full-word-freq.csv",
+    "noncharacteristic-word" => "noncharacteristic-word-freq.csv",
+    "noncharacteristic-word-mainland" => "noncharacteristic-word-mainland-freq.csv",
+    "noncharacteristic-word-HMT" => "noncharacteristic-word-HMT-freq.csv",
+    "noncharacteristic-word-JK" => "noncharacteristic-word-JK-freq.csv",
+    "noncharacteristic-word-other" => "noncharacteristic-word-other-req.csv"
 );
 
 $type = $_GET["type"];
 if (!empty($type)) {
-    $fileName = $typeMapper[$type];
+    $fileName = $type.'.csv';
 }
 
 $data = array();
