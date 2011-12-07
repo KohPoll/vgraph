@@ -272,7 +272,6 @@
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
-            //console.log(from+','+to+';'+s+','+e);
             self._updateRange(s, e);
         });
     };
