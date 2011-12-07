@@ -25,9 +25,9 @@
     };
 
     Graph.prototype.rerenderPlot = function() {
-		console.time('rerenderPlot');
+		if(! $.browser.msie) console.time('rerenderPlot');
         this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
-		console.timeEnd('rerenderPlot');
+		if(! $.browser.msie) console.timeEnd('rerenderPlot');
 	};
 
     Graph.prototype.initLevelMapper = function() {
