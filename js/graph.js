@@ -11,19 +11,27 @@
     };
 
     Graph.prototype.renderPlot = function() {
+		if(! $.browser.msie) console.time('renderPlot');
         this.initPlotData();
         this.initPlotOpt();
 
         this.initLevelMapper();
 
+		if(! $.browser.msie) console.time('renderPlot / plot');
         this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
+		if(! $.browser.msie) console.timeEnd('renderPlot / plot');
+		
+		if(! $.browser.msie) console.timeEnd('renderPlot');
     };
 
     Graph.prototype.rerenderPlot = function() {
+		console.time('rerenderPlot');
         this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
-    };
+		console.timeEnd('rerenderPlot');
+	};
 
     Graph.prototype.initLevelMapper = function() {
+		if(! $.browser.msie) console.time('initLevelMapper');
         var levelInterval = [0], 
             plotData = this.plotData, 
             levelMapper, self = this;
@@ -53,9 +61,11 @@
             ];
         
         this.levelMapper = levelMapper;
+		if(! $.browser.msie) console.timeEnd('initLevelMapper');
     };
 
     Graph.prototype.initPlotData = function() {
+		if(! $.browser.msie) console.time('initPlotData');
         var color = ['lightcoral', 'lightblue', 'lightgreen', 'sandybrown'], 
             level = ['甲', '乙', '丙', '丁'],
             i = 0, j = 0, len, item, 
@@ -81,9 +91,12 @@
                 item.color = color[i];
                 item.label = level[i] + this.getLabelTailByType() + '(' + item.data.length + '个)';
             }
-        } 
+        }
+
+		if(! $.browser.msie) console.timeEnd('initPlotData');		
     };
     Graph.prototype.getLabelTailByType = function() {
+		if(! $.browser.msie) console.time('getLabelTailByType');
         var typeToLabelTail = {
             'full-character': '级字',
             'full-word': '级词',
@@ -94,10 +107,12 @@
             'noncharacteristic-word-other': '级无词性词(其他)'
         };
 
+		if(! $.browser.msie) console.timeEnd('getLabelTailByType');
         return typeToLabelTail[this.type];
     };
 
     Graph.prototype.initPlotOpt = function() {
+		if(! $.browser.msie) console.time('initPlotOpt');
         this.plotOpt = {
             series: {
                 lines: { show: true },
@@ -111,31 +126,41 @@
                 mode: 'x'
             }
         };
+		if(! $.browser.msie) console.timeEnd('initPlotOpt');
     };
 
     Graph.prototype.render = function(data) {
+		if(! $.browser.msie) console.time('render');
         this.dataInfo = data; //按编号的数据,缓存
 
         this.hoverTip();
         this.rangeSelect();
 
+		if(! $.browser.msie) console.time('render / renderPlot');
         this.renderPlot();
+		if(! $.browser.msie) console.timeEnd('render / renderPlot');
 
         this.renderAxeTip();
+		if(! $.browser.msie) console.timeEnd('render');
     };
 
     Graph.prototype.renderAxeTip = function() {
+		if(! $.browser.msie) console.time('renderAxeTip');
         var yTip = $('<p class="y-desp">').html('频<br/>数'),
             xTip = $('<p class="x-desp">').html('编 号');
 
         $('#graph').append(yTip).append(xTip);
+		if(! $.browser.msie) console.timeEnd('renderAxeTip');
     };
 
     Graph.prototype.renderData = function(data) {
+		if(! $.browser.msie) console.time('renderData');
         this.dataContainer.html(data);
+		if(! $.browser.msie) console.timeEnd('renderData');
     };
     
     Graph.prototype.hoverTip = function() {
+		if(! $.browser.msie) console.time('hoverTip');
         var prevPoint = null, self = this,
             placeHolder = this.placeHolder,
             tmpl = function(str, data) {
@@ -226,9 +251,11 @@
                 prevPoint = null;
             }
         });
+		if(! $.browser.msie) console.timeEnd('hoverTip');
     };
 
     Graph.prototype.rangeSelect = function() {
+		if(! $.browser.msie) console.time('rangeSelect');
         var self = this;
 
         this.placeHolder.bind('plotselected', function(evt, ranges) {
@@ -237,9 +264,12 @@
 
             self.updateRange(s, e);
         });
+		
+		if(! $.browser.msie) console.timeEnd('rangeSelect');
     };
 
     Graph.prototype.updateRange = function(s, e) {
+		if(! $.browser.msie) console.time('updateRange');
         var self = this;
         var newPlotData = self.updatePlotData(s, e);
 
@@ -247,10 +277,15 @@
             xaxis: {min: s, max: e+1}
         });
 
+		if(! $.browser.msie) console.time('updateRange / plot');
         self.plot = $.plot(self.placeHolder, newPlotData, self.plotOpt);
-    };
+		if(! $.browser.msie) console.timeEnd('updateRange / plot');
+		
+		if(! $.browser.msie) console.timeEnd('updateRange');
+	};
 
     Graph.prototype.updatePlotData = function(s, e) {
+		if(! $.browser.msie) console.time('updatePlotData');
         var sliceFrArr = function (arr, head, tail) {
             var length_total = 0;
             var length_array = [];
@@ -304,11 +339,13 @@
         };
 
         var rst = sliceFrArr(this.plotData, s, e);
+		if(! $.browser.msie) console.timeEnd('updatePlotData');
         return rst;
     };
 
 	Graph.prototype.getRangeByCenter = function (coordinate, center, radius)
 	{
+		if(! $.browser.msie) console.time('getRangeByCenter');
 		radius = radius || 5;
 
 		var computeHeadAndTail = function (center) {
@@ -334,6 +371,7 @@
 			ret_arr.push(coordinate[i]);
 		}
 
+		if(! $.browser.msie) console.timeEnd('getRangeByCenter');
 		return ret_arr;	
 	}
 
