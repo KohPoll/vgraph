@@ -76,6 +76,22 @@
             var sliceData = data.value.slice(start - 1, end);
             return this.normalizeToRenderData({value: sliceData, level: data.level}, start - 1);
         },
+        sliceDataByCenter: function(dataValue, center, radius) {
+            radius = radius || 5;
+
+            var len = dataValue.length,
+                range = (function () {
+                    var startIndex = (center - radius) - 1,
+                        endIndex = (center + radius) - 1;
+
+			        if (startIndex < 0) { startIndex = 0; }
+			        if (endIndex > len) { endIndex = len - 1; }
+			
+                    return [startIndex, endIndex + 1];
+                })();
+                
+            return dataValue.slice(range[0], range[1]);
+        },
         tmpl: function(str, data) {
             var rst = '', reg = /\{(\w+)\}/g;
             rst = str.replace(reg, function(match, dataKey) {
@@ -83,22 +99,39 @@
             });
             return rst;
         },
-        showInfo: function(info, style, containerId) {
-            containerId = containerId || 'datainfo';
+        generateInfo: function(infoOpts) {
+            infoOpts = $.extend(true, {
+                    container: 'body',
+                    id: 'datainfo',
+                    info: 'no info data.',
+                    style: { }
+                }, infoOpts);
 
-            $('<div>')
-                    .attr('id', containerId)
-                    .html(info)
-                    .css(style)
-                    .appendTo('body').fadeIn(450);
-        },
-        hideInfo: function(containerId) {
-            containerId = containerId || 'datainfo';
-            $('#' + containerId).remove();
+            return $('<div>')
+                    .attr('id', infoOpts.id)
+                    .html(infoOpts.info)
+                    .css(infoOpts.style)
+                    .appendTo(infoOpts.container);
         }
     };
 
     var GP = Graph.prototype;
+
+    GP.renderByLevel = function(levelIndex) { // 0,1,2,3,..., level
+        levelIndex = levelIndex || 0;
+
+        var range = this.levelToRange[levelIndex];
+
+        /*
+        if (levelIndex !== 0) {
+            this._updateRange(range[0], range[1]);
+        } else { //为0画全局，直接渲染，不update range
+            this._render(null, $.extend(true, {}, this.plotOpt, {xaxis: {min: range[0], max: range[1]}}));
+        }
+        */
+        this._updateRange(range[0], range[1]);
+    };
+
 
     GP._init = function() {
         this._initData();
@@ -107,7 +140,7 @@
 
         this._initRangeSelect();
 
-        this._initHoverTip();
+        this._initHover();
 
         this._initCoordsInfo();
     };
@@ -202,21 +235,6 @@
         this.plot = $.plot(this.placeHolder, plotData, plotOpt);
     };
 
-    GP.renderByLevel = function(levelIndex) { // 0,1,2,3,..., level
-        levelIndex = levelIndex || 0;
-
-        var range = this.levelToRange[levelIndex];
-
-        /*
-        if (levelIndex !== 0) {
-            this._updateRange(range[0], range[1]);
-        } else { //为0画全局，直接渲染，不update range
-            this._render(null, $.extend(true, {}, this.plotOpt, {xaxis: {min: range[0], max: range[1]}}));
-        }
-        */
-        this._updateRange(range[0], range[1]);
-    };
-
     GP._initCoordsInfo = function() {
         var yInfo, xInfo,
             placeHolder = this.placeHolder, container = this.placeHolder.parent(),
@@ -250,14 +268,19 @@
         });
     };
 
-    GP._initHoverTip = function() {
-        var self = this, util = Graph.util, dataValue = self.data.value,
-            prevPoint = null, num, curPointData, labels = self.skin.labels,
-            tmplStr = '<ul><li><em>编号: </em>{n}</li>' +
+    GP._initHover = function() {
+        var self = this, util = Graph.util, num,
+            dataValue = self.data.value, labels = self.skin.labels,
+            prevPoint = null, curPointData, curPointRangeData,
+            tip = null,
+            tipTmplStr = '<ul><li><em>编号: </em>{n}</li>' +
                       '<li><em>内容: </em>{d}</li>' +
                       '<li><em>频数: </em>{f}</li>' +
                       '<li><em>级别: </em>{l}</li></ul>',
-            tmplData = null;
+            tipTmplData = null,
+            table = null, tableInfo = '<table><tr><th>内容(词/字/语法点)</th><th>频数</th><th>级别</th></tr>',
+            tableRowTmplStr = '<tr><td>{content}</td><td>{freq}</td><td>{level}</td><tr>',
+            tableRowTmplData = null;
 
         self.placeHolder.bind('plothover', function(evt, pos, item) {
             if (item) {
@@ -265,18 +288,43 @@
                     prevPoint = item.dataIndex;
                     
                     num = parseInt(item.datapoint[0], 10); //编号
-                    curPointData = dataValue[num - 1]
-                    tmplData = { n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1] };
 
-                    util.showInfo(util.tmpl(tmplStr, tmplData), {
-                            top: item.pageY - 20, 
-                            left: item.pageX + 5,
-                            background: item.series.color
+                    // 显示 tip
+                    curPointData = dataValue[num - 1];
+                    tipTmplData = { n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1] };
+                    tip = util.generateInfo({
+                            info: util.tmpl(tipTmplStr, tipTmplData),
+                            style: {
+                                top: item.pageY - 20, 
+                                left: item.pageX + 5,
+                                background: item.series.color
+                            },
                         });
+                    tip.fadeIn(450);
+
+                    // 联动显示右侧数据
+                    curPointRangeData = util.sliceDataByCenter(dataValue, num);
+                    for (var i=0, len=curPointRangeData.length; i<len; ++i) {
+                        var item = curPointRangeData[i];
+                        tableRowTmplData = { content: item.d, freq: item.f, level: item.l };
+                        tableInfo += util.tmpl(tableRowTmplStr, tableRowTmplData);
+                    }
+                    tableInfo += '</table>';
+                    table = util.generateInfo({
+                            container: '#dataContainer',
+                            id: 'dataTable',
+                            info: tableInfo
+                        });
+                    table.fadeIn('slow');
                 }
             } else {
                 prevPoint = null;
-                util.hideInfo();
+
+                // 隐藏tip info
+                tip && tip.remove();
+
+                // 移除table info
+                table && table.fadeOut('slow') && table.remove();
             }
         });
     };
