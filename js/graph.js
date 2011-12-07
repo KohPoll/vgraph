@@ -151,6 +151,9 @@
                 lines: { show: true },
                 points: { show: true }
             },
+            xaxis: {
+                tickDecimals: 0
+            },
             grid: {
                 hoverable: true,
                 clickable: true
