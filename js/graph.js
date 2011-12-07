@@ -75,6 +75,26 @@
         sliceToRenderData: function(data, start, end) {
             var sliceData = data.value.slice(start - 1, end);
             return this.normalizeToRenderData({value: sliceData, level: data.level}, start - 1);
+        },
+        tmpl: function(str, data) {
+            var rst = '', reg = /\{(\w+)\}/g;
+            rst = str.replace(reg, function(match, dataKey) {
+                return data[dataKey];
+            });
+            return rst;
+        },
+        showInfo: function(info, style, containerId) {
+            containerId = containerId || 'datainfo';
+
+            $('<div>')
+                    .attr('id', containerId)
+                    .html(info)
+                    .css(style)
+                    .appendTo('body').fadeIn(450);
+        },
+        hideInfo: function(containerId) {
+            containerId = containerId || 'datainfo';
+            $('#' + containerId).remove();
         }
     };
 
@@ -95,14 +115,14 @@
     GP._initData = function() {
         var renderData = Graph.util.normalizeToRenderData(this.data);
 
-        // init plotData
-        this.plotData = this._generatePlotData(renderData);
-
         // init levelData
         this.levelData = this._generateLevelData(renderData);
 
         // init levelToRange
         this.levelToRange = this._generateLevelToRange(this.levelData);
+
+        // init plotData
+        this.plotData = this._generatePlotData(renderData);
     };
 
     GP._generateLevelToRange = function(levelData) {
@@ -129,14 +149,15 @@
     };
 
     GP._generatePlotData = function(renderData) { 
-        var plotData = [];
+        var plotData = [], util = Graph.util;
 
         for (var i=0, len=renderData.length; i<len; ++i) {
             var series = { }, renderSerieData = renderData[i];
             if (renderSerieData.length === 0) continue;
 
             series['color'] = this.skin.colors[i] || '#333';
-            series['label'] = (this.skin.labels[i] || '') + this.skin.labelSuffix;
+            series['label'] = (this.skin.labels[i] || '') + 
+                util.tmpl(this.skin.labelSuffix, {count: this.levelData[i + 1]});
             series['data'] = renderData[i];
 
             plotData.push(series);
@@ -224,81 +245,42 @@
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
-            console.log(from+','+to+';'+s+','+e);
+            //console.log(from+','+to+';'+s+','+e);
             self._updateRange(s, e);
         });
     };
 
     GP._initHoverTip = function() {
-        var self = this,
-            prevPoint = null;
+        var self = this, util = Graph.util, dataValue = self.data.value,
+            prevPoint = null, num, curPointData, labels = self.skin.labels,
+            tmplStr = '<ul><li><em>编号: </em>{n}</li>' +
+                      '<li><em>内容: </em>{d}</li>' +
+                      '<li><em>频数: </em>{f}</li>' +
+                      '<li><em>级别: </em>{l}</li></ul>',
+            tmplData = null;
 
         self.placeHolder.bind('plothover', function(evt, pos, item) {
             if (item) {
                 if (prevPoint !== item.dataIndex) {
                     prevPoint = item.dataIndex;
                     
-                    console.log(item);
+                    num = parseInt(item.datapoint[0], 10); //编号
+                    curPointData = dataValue[num - 1]
+                    tmplData = { n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1] };
+
+                    util.showInfo(util.tmpl(tmplStr, tmplData), {
+                            top: item.pageY - 20, 
+                            left: item.pageX + 5,
+                            background: item.series.color
+                        });
                 }
             } else {
                 prevPoint = null;
+                util.hideInfo();
             }
         });
     };
 
-
-/*
- *
-    Graph.prototype.hoverTip = function() {
-        var prevPoint = null, self = this,
-            placeHolder = this.placeHolder,
-            tmpl = function(str, data) {
-                var rst = '', reg = /\{(\w+)\}/g;
-                rst = str.replace(reg, function(match, dataKey) {
-                    return data[dataKey];
-                });
-                return rst;
-            },
-            tmplStr = '<ul><li><em>编号: </em>{n}</li>' +
-                        '<li><em>内容: </em>{d}</li>' +
-                        '<li><em>频数: </em>{f}</li>' +
-                        '<li><em>级别: </em>{l}</li></ul>',
-            showDataInfo = function(mouseX, mouseY, num, bgColor) {
-                var fToText = ['甲', '乙', '丙', '丁'];
-                var idx = parseInt(num) - 1;
-                var info = tmpl(tmplStr, {
-                        n: num, 
-                        d: this.dataInfo[idx].d, 
-                        f: this.dataInfo[idx].f, 
-                        l: fToText[this.dataInfo[idx].l - 1]
-                    });
-                //console.log(info);
-                                
-                $('<div id="datainfo">')
-                    .html(info)
-                    .css({
-                        backgroundColor: bgColor,
-                        top: mouseY - 20,
-                        left: mouseX + 5
-                    }).appendTo('body').fadeIn(200);
-            };
-
-        placeHolder.bind('plothover', function(evt, pos, item) {
-            if (item) {
-                if (prevPoint != item.dataIndex) {
-                    prevPoint = item.dataIndex;
-
-                    $('#datainfo').remove();
-                    var num = item.datapoint[0]; //编号
-                    showDataInfo.apply(self, [item.pageX, item.pageY, num, item.series.color]);
-                }
-            } else {
-                $('#datainfo').remove();
-                prevPoint = null;
-            }
-        });
-    };
-*/
 
     window.Graph = Graph;
 })(jQuery);
