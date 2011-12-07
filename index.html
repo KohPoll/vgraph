@@ -58,8 +58,12 @@ $(document).ready(function() {
 
     var graph, 
         drawGraph = function(graph) {
+			if (!$.browser.msie) console.time("drawGraph");
+			
             var level = $(':checked')[1].value;
             graph.renderByLevel(parseInt(level, 10));
+			
+			if (!$.browser.msie) console.timeEnd("drawGraph");
         };
 
     $.getJSON('data/poll-data.php?type=full-character', function(resp) {

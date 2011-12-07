@@ -7,6 +7,7 @@
      *  skin
      */
     function Graph(opts) {
+		if (!$.browser.msie) console.time("Graph");
         // 画布的容器
         this.placeHolder = opts.placeHolder && $(placeHolder);
 
@@ -29,6 +30,7 @@
         this.levelToRange = null;  
 
         this._init();
+		if (!$.browser.msie) console.timeEnd("Graph");
     };
 
     Graph.skin = {
@@ -165,23 +167,30 @@
     };
 
     GP._updateRange = function(s, e) {
+		if (!$.browser.msie) console.time('updateRange');
         var renderData = Graph.util.sliceToRenderData(this.data, s, e),
             plotData = this._generatePlotData(renderData),
             plotOpt = $.extend(true, {}, this.plotOpt, {
                 xaxis: {min: s, max: e}
             });
 
+		if (!$.browser.msie) console.time('updateRange / _render');
         this._render(plotData, plotOpt);
+		if (!$.browser.msie) console.timeEnd('updateRange / _render');
+		if (!$.browser.msie) console.timeEnd('updateRange');
     };
 
     GP._render = function(plotData, plotOpt) {
         plotData = plotData || this.plotData;
         plotOpt = plotOpt || this.plotOpt;
 
+		if (!$.browser.msie) console.time('_render / plot');
         this.plot = $.plot(this.placeHolder, plotData, plotOpt);
+		if (!$.browser.msie) console.timeEnd('_render / plot');
     };
 
     GP.renderByLevel = function(levelIndex) { // 0,1,2,3,..., level
+		if (!$.browser.msie) console.time('renderByLevel');
         levelIndex = levelIndex || 0;
 
         var range = this.levelToRange[levelIndex];
@@ -194,6 +203,7 @@
         }
         */
         this._updateRange(range[0], range[1]);
+		if (!$.browser.msie) console.timeEnd('renderByLevel');
     };
 
     GP._initCoordsInfo = function() {
@@ -224,7 +234,7 @@
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
-            console.log(from+','+to+';'+s+','+e);
+            // console.log(from+','+to+';'+s+','+e);
             self._updateRange(s, e);
         });
     };
@@ -238,7 +248,7 @@
                 if (prevPoint !== item.dataIndex) {
                     prevPoint = item.dataIndex;
                     
-                    console.log(item);
+                    //console.log(item);
                 }
             } else {
                 prevPoint = null;
