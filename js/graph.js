@@ -278,8 +278,9 @@
                       '<li><em>频数: </em>{f}</li>' +
                       '<li><em>级别: </em>{l}</li></ul>',
             tipTmplData = null,
-            table = null, tableInfo = '<table><tr><th>内容(词/字/语法点)</th><th>频数</th><th>级别</th></tr>',
-            tableRowTmplStr = '<tr><td>{content}</td><td>{freq}</td><td>{level}</td><tr>',
+            table = null, tableInfo = '',
+            tableRowStr = '<table><tr><th>内容</th><th>频数</th><th>级别</th></tr>',
+            tableRowTmplStr = '<tr><td>{content}</td><td>{freq}</td><td>{level}</td></tr>',
             tableRowTmplData = null;
 
         self.placeHolder.bind('plothover', function(evt, pos, item) {
@@ -292,6 +293,7 @@
                     // 显示 tip
                     curPointData = dataValue[num - 1];
                     tipTmplData = { n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1] };
+                    tip && tip.remove();
                     tip = util.generateInfo({
                             info: util.tmpl(tipTmplStr, tipTmplData),
                             style: {
@@ -303,10 +305,15 @@
                     tip.fadeIn(450);
 
                     // 联动显示右侧数据
+
+                    // 移除table info
+                    table && table.fadeOut('slow') && table.remove();
+                    tableInfo = '';
+                    tableInfo += tableRowStr;
                     curPointRangeData = util.sliceDataByCenter(dataValue, num);
                     for (var i=0, len=curPointRangeData.length; i<len; ++i) {
                         var item = curPointRangeData[i];
-                        tableRowTmplData = { content: item.d, freq: item.f, level: item.l };
+                        tableRowTmplData = { content: item.d, freq: item.f, level: labels[item.l - 1] };
                         tableInfo += util.tmpl(tableRowTmplStr, tableRowTmplData);
                     }
                     tableInfo += '</table>';
@@ -322,9 +329,6 @@
 
                 // 隐藏tip info
                 tip && tip.remove();
-
-                // 移除table info
-                table && table.fadeOut('slow') && table.remove();
             }
         });
     };
