@@ -55,7 +55,7 @@
 
     Graph.skin = {
         labelSuffix: '数据', //label后缀,可使用模板
-        colors: ['red', 'green', 'yellow', 'blue'], //分块数据的color，和类别对应
+        colors: ['lightcoral', 'lightblue', 'lightgreen', 'sandybrown'], //分块数据的color，和类别对应
         labels: ['甲级', '乙级', '丙级', '丁级'], //分块数据的label，和类别对应
         coords: ['编 号', '频<br/>数']
     };
