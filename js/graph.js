@@ -1,5 +1,27 @@
 (function($) {
 
+    // 超微型模板引擎
+    if (typeof $.tmpl === 'undefined') {
+        $.tmpl = {};
+
+        $.tmpl['object'] = function(str, data) {
+            var rst = '', reg = /\{(\w+)\}/g;
+            rst = str.replace(reg, function(match, dataKey) {
+                return data[dataKey];
+            });
+            return rst;
+        };
+
+        $.tmpl['for'] = function(str, data) {
+            var rst = '';
+            for (var i=0, len=data.length; i<len; ++i) {
+                var item = data[i];
+                rst += $.tmpl['object'](str, item);
+            }
+            return rst;
+        };
+    }
+
     /*
      * opts.
      *  placeHolder
@@ -91,30 +113,10 @@
                 })();
                 
             return dataValue.slice(range[0], range[1]);
-        },
-        tmpl: function(str, data) {
-            var rst = '', reg = /\{(\w+)\}/g;
-            rst = str.replace(reg, function(match, dataKey) {
-                return data[dataKey];
-            });
-            return rst;
-        },
-        generateInfo: function(infoOpts) {
-            infoOpts = $.extend(true, {
-                    container: 'body',
-                    id: 'datainfo',
-                    info: 'no info data.',
-                    style: { }
-                }, infoOpts);
-
-            return $('<div>')
-                    .attr('id', infoOpts.id)
-                    .html(infoOpts.info)
-                    .css(infoOpts.style)
-                    .appendTo(infoOpts.container);
         }
     };
 
+        
     var GP = Graph.prototype;
 
     GP.renderByLevel = function(levelIndex) { // 0,1,2,3,..., level
@@ -131,7 +133,6 @@
         */
         this._updateRange(range[0], range[1]);
     };
-
 
     GP._init = function() {
         this._initData();
@@ -190,7 +191,7 @@
 
             series['color'] = this.skin.colors[i] || '#333';
             series['label'] = (this.skin.labels[i] || '') + 
-                util.tmpl(this.skin.labelSuffix, {count: this.levelData[i + 1]});
+                $.tmpl['object'](this.skin.labelSuffix, {count: this.levelData[i + 1]});
             series['data'] = renderData[i];
 
             plotData.push(series);
@@ -269,19 +270,27 @@
     };
 
     GP._initHover = function() {
-        var self = this, util = Graph.util, num,
-            dataValue = self.data.value, labels = self.skin.labels,
-            prevPoint = null, curPointData, curPointRangeData,
-            tip = null,
-            tipTmplStr = '<ul><li><em>编号: </em>{n}</li>' +
-                      '<li><em>内容: </em>{d}</li>' +
-                      '<li><em>频数: </em>{f}</li>' +
-                      '<li><em>级别: </em>{l}</li></ul>',
-            tipTmplData = null,
-            table = null, tableInfo = '',
-            tableRowStr = '<table><tr><th>内容</th><th>频数</th><th>级别</th></tr>',
-            tableRowTmplStr = '<tr><td>{content}</td><td>{freq}</td><td>{level}</td></tr>',
-            tableRowTmplData = null;
+        var self = this, 
+            util = Graph.util, dataValue = this.data.value, labels = this.skin.labels,
+            num, curPointData, curPointRangeData, prevPoint = null,
+            tip, table;
+                
+        tip = new Tip({
+                id: 'datainfo',
+                template: '<ul><li><em>编号: </em>{n}</li>' +
+                            '<li><em>内容: </em>{d}</li>' +
+                            '<li><em>频数: </em>{f}</li>' +
+                            '<li><em>级别: </em>{l}</li></ul>'
+            });
+
+        table = new Table({
+                id: 'datatable',
+                container: '#dataContainer',
+                template: {
+                    header: '<tr><th>内容</th><th>频数</th><th>级别</th></tr>',
+                    row: '<tr><td>{content}</td><td>{freq}</td><td>{level}</td></tr>'
+                }
+            });
 
         self.placeHolder.bind('plothover', function(evt, pos, item) {
             if (item) {
@@ -290,47 +299,78 @@
                     
                     num = parseInt(item.datapoint[0], 10); //编号
 
-                    // 显示 tip
                     curPointData = dataValue[num - 1];
-                    tipTmplData = { n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1] };
-                    tip && tip.remove();
-                    tip = util.generateInfo({
-                            info: util.tmpl(tipTmplStr, tipTmplData),
-                            style: {
-                                top: item.pageY - 20, 
-                                left: item.pageX + 5,
-                                background: item.series.color
-                            },
-                        });
-                    tip.fadeIn(450);
+                    tip.render({n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1]})
+                       .show({top: item.pageY - 20, left: item.pageX + 5, background: item.series.color});
 
-                    // 联动显示右侧数据
-
-                    // 移除table info
-                    table && table.fadeOut('slow') && table.remove();
-                    tableInfo = '';
-                    tableInfo += tableRowStr;
-                    curPointRangeData = util.sliceDataByCenter(dataValue, num);
-                    for (var i=0, len=curPointRangeData.length; i<len; ++i) {
-                        var item = curPointRangeData[i];
-                        tableRowTmplData = { content: item.d, freq: item.f, level: labels[item.l - 1] };
-                        tableInfo += util.tmpl(tableRowTmplStr, tableRowTmplData);
+                    var d = util.sliceDataByCenter(dataValue, num);
+                    curPointRangeData = [];
+                    for (var i=0, len=d.length; i<len; ++i) {
+                        var cur = d[i];
+                        curPointRangeData.push({content: cur.d, freq: cur.f, level: labels[cur.l - 1]});
                     }
-                    tableInfo += '</table>';
-                    table = util.generateInfo({
-                            container: '#dataContainer',
-                            id: 'dataTable',
-                            info: tableInfo
-                        });
-                    table.fadeIn('slow');
-                }
+                    table.render(curPointRangeData).show();
+                }             
             } else {
                 prevPoint = null;
 
-                // 隐藏tip info
-                tip && tip.remove();
+                tip.hide();
+                //table.hide();
             }
         });
+    };
+
+
+    /*
+     * opts.
+     *  id, template, container.
+     */
+    function Tip(opts) {
+        this.template = opts.template || '';
+        this.container = opts.container || 'body';
+        this.id = opts.id || 'tip' + +new Date();
+    }
+    Tip.prototype.render = function(data) {
+        this.tip && this.tip.fadeOut('fast').remove(); //先清除
+
+        this.tip = $('<div>').attr('id', this.id);
+        this.tip
+            .html($.tmpl['object'](this.template, data));
+        return this;
+    };
+    Tip.prototype.show = function(style, speed) {
+        speed = speed || 500;
+        this.tip && (this.tip.css(style).appendTo(this.container).fadeIn(speed));
+        return this;
+    };
+    Tip.prototype.hide = function() {
+        this.tip && this.tip.fadeOut('fast').remove();
+        return this;
+    };
+
+    /*
+     * opts.
+     * id, template{header, row}, container.
+     */
+    function Table(opts) {
+        this.template = opts.template || {};
+        this.container = $(opts.container) || 'body';
+        this.id = opts.id || 'table' + +new Date();
+
+        this.table = $('<table>').attr('id', this.id).appendTo(this.container);
+    }
+    Table.prototype.render = function(data) {
+        var row = $.tmpl['for'](this.template.row, data);
+        this.table && this.table.html('').html(this.template.header + row);
+        return this;
+    };
+    Table.prototype.show = function(speed) {
+        speed = speed || 'slow';
+        this.table && this.table.fadeIn(speed);
+        return this;
+    };
+    Table.prototype.hide = function() {
+        this.table && this.table.fadeOut('slow').remove();
     };
 
 

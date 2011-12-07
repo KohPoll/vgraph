@@ -19,10 +19,20 @@ button, input, select, textarea {
     height: 400px;
     margin-left: 25px;
 }
+
 #side {
     float: right;
     width: 210px;
-    margin-top: 7px;
+}
+#dataContainer {
+    padding: 5px;
+}
+#dataContainer h2 {
+    margin: 0 0 0 10px;
+    padding-bottom: 5px;
+    font-size: 16px;
+    color: #666;
+    border-bottom: 1px solid #eee;
 }
 
 .control {
@@ -40,10 +50,9 @@ button, input, select, textarea {
 #datainfo {
     position: absolute;
     display: none;
-    border: 1px solid #fdd;
+    border: 1px solid #333;
     border-radius: 5px;
     padding: 5px;
-    background: #fee;
 }
 #datainfo ul {
     list-style: none;
@@ -58,6 +67,16 @@ button, input, select, textarea {
     text-align: right;
 }
 
+#datatable {
+	display: none;
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+#datatable th, #datatable td {
+	width: 80px;
+    text-align: center;
+}
+
 .preload {
     width: 80px;
     height: 80px;
@@ -66,23 +85,3 @@ button, input, select, textarea {
     top: 0;
     background: url(../image/loading.gif);
 }
-
-#dataContainer {
-    padding: 5px;
-    border: 1px solid #333;
-    border-radius: 5px;
-}
-#dataContainer h2 {
-    margin-left: 10px;
-    font-size: 16px;
-    color: #666;
-    border-bottom: 1px solid #eee;
-}
-#dataTable {
-	display: none;
-}
-#dataTable th, #dataTable td {
-	width: 80px;
-    text-align: center;
-}
-
