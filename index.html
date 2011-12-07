@@ -58,28 +58,37 @@
 <script>
 $(document).ready(function() {
 
-    var graph, 
-        drawGraph = function(graph) {
-            var level = $(':checked')[1].value;
-            graph.renderByLevel(parseInt(level, 10));
-        };
+    var control = $('#J_control'),
+        dataContainer = $('#dataContainer'),
+        graph = null;
 
-    $.getJSON('data/poll-data.php?type=full-character', function(resp) {
-        var graph = new Graph({
-            placeHolder: '#placeHolder',
-            skin: { labelSuffix: '字({count})' },
-            data: { value: resp }
-        });
-        //graph.render();
+    control.bind('click', function(evt) {
+        var target = evt.target,
+            checkedItem, type, level;
 
-        var control = $('#J_control');
-        control.bind('click', function(evt) {
-            var target = evt.target;
-            if (target.tagName === 'INPUT') {
-                drawGraph(graph);
-            }
-        });
-        drawGraph(graph);
+        if (target.tagName === 'INPUT') {
+            checkedItem = $(':checked');
+
+            type = checkedItem[0].value;
+            level = parseInt(checkedItem[1].value, 10);
+
+            //drawGraph(graph);
+            $.getJSON('data/poll-data.php?type=' + type, function(resp) {
+                if (!graph) {
+                    graph = new Graph({
+                        placeHolder: '#placeHolder',
+                        skin: { labelSuffix: '字({count})' },
+                        data: { value: resp }
+                    });
+                } else {
+                    graph.update({ 
+                        data: { value: resp }
+                    });
+                }
+
+                graph.renderByLevel(level);
+            });
+        }
     });
 });
 </script>

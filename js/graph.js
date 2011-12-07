@@ -134,6 +134,14 @@
         this._updateRange(range[0], range[1]);
     };
 
+    GP.update = function(opts) {
+        this.data = $.extend(true, {}, Graph.data, opts.data);
+        this.skin = $.extend(true, {}, Graph.skin, opts.skin);
+
+        this._initData();
+        this._initPlotOpt();
+    };
+
     GP._init = function() {
         this._initData();
 
@@ -334,8 +342,7 @@
         this.tip && this.tip.fadeOut('fast').remove(); //先清除
 
         this.tip = $('<div>').attr('id', this.id);
-        this.tip
-            .html($.tmpl['object'](this.template, data));
+        this.tip.html($.tmpl['object'](this.template, data));
         return this;
     };
     Tip.prototype.show = function(style, speed) {
@@ -356,17 +363,19 @@
         this.template = opts.template || {};
         this.container = $(opts.container) || 'body';
         this.id = opts.id || 'table' + +new Date();
-
-        this.table = $('<table>').attr('id', this.id).appendTo(this.container);
     }
     Table.prototype.render = function(data) {
+        this.table && this.table.fadeOut('slow').remove(); //先清除
+
         var row = $.tmpl['for'](this.template.row, data);
-        this.table && this.table.html('').html(this.template.header + row);
+        this.table = $('<table>').attr('id', this.id);
+        this.table.html(this.template.header + row);
+
         return this;
     };
     Table.prototype.show = function(speed) {
         speed = speed || 'slow';
-        this.table && this.table.fadeIn(speed);
+        this.table && this.table.appendTo(this.container).fadeIn(speed);
         return this;
     };
     Table.prototype.hide = function() {
