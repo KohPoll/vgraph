@@ -69,7 +69,7 @@
     Graph.prototype.initPlotData = function() {
 		// if(! $.browser.msie) console.time('initPlotData');
         var color = ['#e44323', '#3686cc', '#6caf24', '#806061'], 
-            level = ['甲', '乙', '丙', '丁'],
+            level = ['一', '二', '三', '四'],
             i = 0, j = 0, len, item, 
             plotData = this.plotData, dataInfo = this.dataInfo;
 
@@ -91,7 +91,7 @@
             for (i = 0, len=plotData.length; i<len; ++i) {
                 item = plotData[i];
                 item.color = color[i];
-                item.label = level[i] + this.getLabelTailByType() + '(' + item.data.length + '个)';
+                item.label = level[i] + '级' + this.getLabelTailByType() + '(' + item.data.length + '个)';
             }
         }
 
@@ -100,13 +100,11 @@
     Graph.prototype.getLabelTailByType = function() {
 		// if(! $.browser.msie) console.time('getLabelTailByType');
         var typeToLabelTail = {
-            'full-character': '级字',
-            'full-word': '级词',
-            'noncharacteristic-word': '级无词性词',
-            'noncharacteristic-word-mainland': '级无词性词(大陆)',
-            'noncharacteristic-word-HMT': '级无词性词(港澳台)',
-            'noncharacteristic-word-JK': '级无词性词(日韩)',
-            'noncharacteristic-word-other': '级无词性词(其他)'
+            'char': '字频',
+            'cword': '有词性词',
+            'ncword': '无词性词',
+            'cul': '文化点',
+            'gram': '语法点'
         };
 
 		// if(! $.browser.msie) console.timeEnd('getLabelTailByType');
@@ -139,7 +137,7 @@
     };
 
 	Graph.prototype.printDataList = function (target_id) {
-		var fToText = ['甲', '乙', '丙', '丁'];
+		var fToText = ['一', '二', '三', '四'];
 		$('#data_list').remove();
 		$('#data_head').remove();
 		
@@ -152,8 +150,8 @@
 		
 		$('<ul id="data_list" >')
 		.css({
-			'overflow-y': 'scroll',
-			'height' 	: 270
+			'overflow-y': 'hidden',
+			'height' 	: 318
 		})
 		.appendTo('#' + target_id);
 		
@@ -179,7 +177,7 @@
 	{	
 		$('#data_list').children().css({
 			'background-color':	'',
-			'color' : 'black'
+			'color' : 'white'
 		});
 		
 		var ul_element = $('#data_list')[0],
@@ -261,7 +259,7 @@
                         '<li><em>内容: </em>{d}</li>' +
                         '<li><em>频数: </em>{f}</li>' +
                         '<li><em>级别: </em>{l}</li></ul>',
-            fToText = ['甲', '乙', '丙', '丁'],
+            fToText = ['一', '二', '三', '四'],
             showDataInfo = function(mouseX, mouseY, num, bgColor) {
                 var idx = parseInt(num, 10) - 1;
 				// console.log('idx: %d', idx);
