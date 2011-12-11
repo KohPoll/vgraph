@@ -23,7 +23,7 @@
             materials.push(new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff}));
         }
 
-        cube = new THREE.Mesh(new THREE.CubeGeometry(200, 200, 200, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
+        cube = new THREE.Mesh(new THREE.CubeGeometry(150, 150, 150, 1, 1, 1, materials ), new THREE.MeshFaceMaterial() );
         //cube.position.y = 150;
         cube.overdraw = true;
         scene.add(cube);
