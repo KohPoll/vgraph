@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <title>CTM-Start</title>
+
+    <script src="js/lib/Three.js"></script>
+    <script src="js/lib/RequestAnimationFrame.js"></script>
+
+    <script src="js/lib/jquery.js"></script>
+
+    <script src="js/boid.js"></script>
+    <script src="js/text.js"></script>
+    <script src="js/cube.js"></script>
+    <script src="js/animscene.js"></script>
+
+</head>
+
+<body>
+    <!--
+    <div id="nav" class="main-nav">
+        <h1 class="main-nav-title" title="《国际汉语教材编写指南》信息要素统计">《国际汉语教材编写指南》信息要素统计</h1>
+        <div class="main-nav-act">
+            <h2>语言要素检索</h2>
+            <ul>
+                <li style="width:45px;">
+                    <a href="#" title="单字">单字</a>
+                </li>
+                <li style="width:45px;">
+                    <a href="#" title="词汇" class="mn-act-sub">词汇</a>
+               </li>
+                <li style="width:62px;">
+                    <a href="#" title="语法点">语法点</a>
+                </li>
+                <li style="width:62px;">
+                    <a href="#" title="文化点" class="mn-act-last">文化点</a>
+                </li>
+            </ul>
+        </div>
+        <div class="mn-act-tip" style="display:none;">
+            <p><a href="#" title="有词性">有词性</a></p>
+            <p><a href="#" title="无词性">无词性</a></p>
+        </div>
+    </div>
+    <script>
+        var $nav = $('#nav');
+        var $tip = $('div.mn-act-tip', $nav);
+        var $sub = $('a.mn-act-sub', $nav);
+        $sub.bind('mouseenter', function(evt) {
+            $tip.css('display', 'block');
+        }).bind('mouseleave', function(evt) {
+            if (evt.toElement.tagName !== 'DIV') {
+                $tip.css('display', 'none');
+            }
+        });
+        $tip.bind('mouseleave', function(evt) {
+            $tip.css('display', 'none');
+        });
+    </script>
+    -->
+
+    <div id="painter"></div>
+
+    <div id="cubeLogo"></div>
+
+    <div id="content" style="position:absolute;left:0;top:0;display:none;">
+Introduction
+I have used Three.js for some of my experiments, and it does a really great job of abstracting away the headaches of getting going with 3D in the browser. With it you can create cameras, objects, lights, materials and more, and you have a choice of renderer, which means you can decide if you want your scene to be drawn using HTML 5's canvas, WebGL or SVG. And since it's open source you could even get involved with the project. But right now I'll focus on what I've learned by playing with it as an engine, and talk you through some of the basics.
+
+For all the awesomeness of Three.js, there can be times where you might struggle. Typically you will need to spend quite a large amount of time with the examples, reverse engineering and (in my case certainly) hunting down specific functionality and occasionally asking questions via GitHub. If you have to as questions, by the way, I've found Mr. doob and AlteredQualia are extremely helpful!
+
+1. The basics
+I will assume that you have at least a passing knowledge of 3D, and reasonable proficiency with JavaScript. If you don't it may be worth learning a bit before you try and play with this stuff, as it can get a little confusing.
+
+In our 3D world we will have some of the following, which I will guide you through the process of creating:
+
+A scene
+A renderer
+A camera
+An object or two (with materials)
+You can, of course, do some crazy things, and my hope is that you will go on to do that and start to experiment with 3D in your browser.
+
+2. Support
+Just a quick note on support in the browsers. Google's Chrome browser is, in my experience, the best browser to work with in terms of which renderers are supported, and the speed of the underlying JavaScript engine. Chrome supports Canvas, WebGL and SVG and it's blazingly fast. Firefox is a close second, with the advent of version 4. Its JavaScript engine does seem to be a touch slower than Chrome's, but again its support for the render technologies is great. Opera and Safari are in the process of adding WebGL support, but their current versions only support canvas. Internet Explorer (version 9+) support canvas rendering only, and I've not heard anything of Microsoft planning to add WebGL capabilities.
+
+3. Set the Scene
+I'll assume you've chosen a browser that supports all the rendering technologies, and that you want to render with canvas or WebGL, since they're the more standard choices. Canvas is more widely supported than WebGL, but it's worth noting that WebGL runs on your graphics card's GPU, which means that your CPU can concentrate on other non-rendering tasks like any physics or user interaction you're trying to do.
+
+Irrespective of your chosen renderer you should bear in mind that the JavaScript will need to optimised for performance. 3D isn't a lightweight task for a browser (and it's awesome that it's even possible), so be careful to understand where any bottlenecks are in your code, and remove them if you can!
+
+So with that said, and on the assumption you have downloaded and included three.js in your HTML file, how do you go about setting up a scene? Like this:
+// set the scene size
+var WIDTH = 400,
+    HEIGHT = 300;
+
+// set some camera attributes
+var VIEW_ANGLE = 45,
+    ASPECT = WIDTH / HEIGHT,
+    NEAR = 0.1,
+    FAR = 10000;
+
+// get the DOM element to attach to
+// - assume we've got jQuery to hand
+var $container = $('#container');
+
+// create a WebGL renderer, camera
+// and a scene
+var renderer = new THREE.WebGLRenderer();
+var camera = new THREE.PerspectiveCamera(
+                   VIEW_ANGLE,
+                   ASPECT,
+                   NEAR,
+                   FAR );
+
+var scene = new THREE.Scene();
+
+// the camera starts at 0,0,0 so pull it back
+camera.position.z = 300;
+
+// start the renderer
+renderer.setSize(WIDTH, HEIGHT);
+
+// attach the render-supplied DOM element
+$container.append(renderer.domElement);
+Not too tricky, really!
+
+4. Making a Mesh
+So we have a scene, a camera and a renderer (I opted for a WebGL one in my sample code) but we have nothing to actually draw. Three.js actually comes with support for loading a few different standard file types, which is great if you are outputting models from Blender, Maya, Cinema4D or anything else. To keep things simple (this is about getting started after all!) I'll talk about primitives. Primitives are geometric meshes, relatively basic ones like Spheres, Planes, Cubes and Cylinders. Three.js lets you create these types of primitives easily:
+// set up the sphere vars
+var radius = 50, segments = 16, rings = 16;
+
+// create a new mesh with sphere geometry -
+// we will cover the sphereMaterial next!
+var sphere = new THREE.Mesh(
+   new THREE.SphereGeometry(radius,
+   segments,
+   rings),
+
+   sphereMaterial);
+
+// add the sphere to the scene
+scene.add(sphere);
+All good, but what about the material for the sphere? In the code we've used a variable sphereMaterial but we've not defined it yet. First we need to talk about materials in a bit more detail.
+
+5. Materials
+Without doubt this is one of the most useful parts of Three.js. It provides for you a number of common (and very handy) materials to apply to your meshes:
+
+"Basic" - which just means that it renders 'unlit', as far as I can tell
+Lambert
+Phong
+There are more, but again in the interests of simplicity I'll let you discover those for yourself. In the case of WebGL particularly these materials can be a life-saver. Why? Well because in WebGL you have to write shaders for everything being rendered. Shaders are a huge topic in themselves, but in short they are written in GLSL (OpenGL Shader Language), which tells the GPU how something should look. This means you need to mimic the maths of lighting, reflection and so on. It can get very complicated very quickly. Thanks to Three.js you don't have to do this if you don't want to because it abstracts that away for you. If you want to write shaders, however, you can do that too with a MeshShaderMaterial, so it's a flexible setup.
+
+For now, however, let's apply a lambert material to the sphere:
+    </div>
+
+    <script>
+    AnimScene.init({
+        container: 'painter',
+        w: window.innerWidth,
+        h: window.innerHeight
+    }).run();
+    </script>
+
+
+    <script src="js/cubeLogo.js"></script>
+</body>
+</html>
