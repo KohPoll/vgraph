@@ -15,16 +15,16 @@ button, input, select, textarea {
     color: #333;
 }
 
-body {
-	background-color: #333;
-}
 
+body { 
+    /*background: #333; */
+    background: url(../image/bg1.jpg) no-repeat;
+}
 
 #painter {
-    background-color: #333;
+    /*background: #333;*/
     position: relative;
 }
-
 #cubeLogo {
     position: absolute;
     left: 320px;
@@ -35,6 +35,10 @@ body {
     display: none;
     cursor: pointer;
     z-index: 10;
+}
+#content {
+    width: 990px;
+    margin: 0 auto;
 }
 
 

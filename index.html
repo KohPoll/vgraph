@@ -20,9 +20,6 @@
 </head>
 <body>
 	<div id="head">
-		<!-- <h1 class="title">
-			<img src="image/title.png" alt="国际汉语教材编写指南&nbsp;|&nbsp;语言要素统计" />
-		</h1> -->
 		<h1 class="title">
 			<span class="main-title">国际汉语教材编写指南</span>
 			<span>&nbsp;|&nbsp;</span>
@@ -31,19 +28,16 @@
 	</div>
 	<div id="nav">
 		<ul id="type-menu">
-			<li><button id="type-menu-1" value="full-word" class="checked" >单字</button></li>
-			<li><button id="type-menu-2" value="noncharacteristic-word" >词汇（无词性）</button></li>
-			<li><button id="type-menu-3" value="noncharacteristic-word-mainland" >词汇（有词性）</button></li>
-			<li><button id="type-menu-4" value="noncharacteristic-word-HMT" >语法点</button></li>
-			<li><button id="type-menu-5" value="noncharacteristic-word-JK" >文化点</button></li>
-			<!-- <li><button id="type-menu-6" value="noncharacteristic-word-other" >无词性词（其他）</button></li> -->
+			<li><button id="type-menu-1" value="char" class="checked" >单字</button></li>
+			<li><button id="type-menu-2" value="ncword" >词汇（无词性）</button></li>
+			<li><button id="type-menu-3" value="cword" >词汇（有词性）</button></li>
+			<li><button id="type-menu-4" value="gram" >语法点</button></li>
+			<li><button id="type-menu-5" value="cul" >文化点</button></li>
 		</ul>
 	</div>
     <div id="container">
         <div id="graph">
-            <!--<div class="preload"></div>-->
             <div id="placeHolder"></div>
-            <!-- <br/><br/><br/><br/><br/><br/> -->
         </div>
 
         <div id="side">
@@ -64,97 +58,56 @@
 		</div>
     </div>
 
-    <!--<div class="preload"></div>-->
-
     <script src="js/graph.js"></script>
 
 <script>
 $(document).ready(function() {
-	var dataCache = {}, 
-		baseUrl = 'data/poll-data.php',
-		graphTypeArr = [
-			'full-word', 
-			'noncharacteristic-word',
-			'noncharacteristic-word-mainland',
-			'noncharacteristic-word-HMT',
-			'noncharacteristic-word-JK',
-			'noncharacteristic-word-other'
-		],
-		
-		loadAllData = function () 
-		{
-			var getdata = function (i) {
-				var graphType = graphTypeArr[i];
-				var reqUrl = baseUrl + '?type=' + graphType;
-			
-				$.getJSON(reqUrl, function(resp) {
-					dataCache[graphType] = resp;
-				});
-			}
-			
-			for (var i = 0; i < graphTypeArr.length; i++)
-			{
-				getdata(i);
-			}
-		};
-		
-	// loadAllData();
-	
-	var drawGraphByJson = function (json_data, type, level)
-	{
-		level = level || '0';
-		type = type || 'full-word';
-		graph = new Graph('#placeHolder', '#dataContainer', type);
-		graph.render(json_data);
-		graph.levelMapper[level]();
-	};
-	
-	var drawGraph = function (type, level)
-	{
-	
-		if (dataCache[type])
-		{
-			drawGraphByJson(dataCache[type], type, level);
-		}
-		else 
-		{
-			var reqUrl = baseUrl + '?type=' + type;
-			
-			$.getJSON(reqUrl, function(resp) {
-				drawGraphByJson(resp, type);
+    var GraphAPI = {
+        dataCache: {},
+        init: function() {
+            this.bindEvent();
+        },
+        drawGraphByJson: function(jsonData, type, level) {
+            level = level || '0';
+            type = type || 'char';
+            var graph = new Graph('#placeHolder', '#dataContainer', type);
+            graph.render(jsonData);
+            graph.levelMapper[level]();
+        },
+        drawGraph: function(type, level) {
+            if (this.dataCache[type]) {
+			    this.drawGraphByJson(this.dataCache[type], type, level);
+		    }
+        },
+        redrawGraph: function() {
+            checkedItem = $('.checked');
 
-				dataCache[type] = resp;
-			});
-		}
-	};
-	
-	var redrawGraph = function ()
-	{
-		checkedItem = $('.checked');
-
-		var graphType = checkedItem[0].value;
-		var graphLevel = checkedItem[1].value;
+		    var graphType = checkedItem[0].value;
+		    var graphLevel = checkedItem[1].value;
 			
-		drawGraph(graphType, graphLevel);
-	}
+		    this.drawGraph(graphType, graphLevel);
+        },
+        bindEvent: function() {
+            var self = this;
 
+            $('#level-menu button').click(function () {
+                $('#level-menu button').removeClass('checked');
+                $(this).addClass('checked');
+            
+                self.redrawGraph();
+            });
 	
-	$('#level-menu button').click(function () {
-		$('#level-menu button').removeClass('checked');
-		$(this).addClass('checked');
+	        $('#type-menu button').click(function (event) {
+		        event.preventDefault()
+		        $('#type-menu button').removeClass('checked');
+		        $(this).addClass('checked');
 		
-		redrawGraph();
-	});
-	
-	$('#type-menu button').click(function (event) {
-		event.preventDefault()
-		$('#type-menu button').removeClass('checked');
-		$(this).addClass('checked');
-		
-		redrawGraph();
-	});
-		
-	drawGraph('full-word', 0);
+		        self.redrawGraph();
+	        });
+        }
+    };
+
+	drawGraph('char', 0);
 });
 </script>
 </body>

@@ -106,9 +106,12 @@ var AnimScene = {
                 if (intersects.length > 0) {
                     var materialIdx = intersects[0].face.materialIndex;
 
-                    var region = self._regionMapper[materialIdx],
-                        data = self._data[region];
-                    console.log(region);
+                    var region = self._regionMapper[materialIdx];
+                    //console.log(region);
+
+                    window.GraphAPI.dataCache = self._data[region];
+                    window.GraphAPI.drawGraph('char', 0);
+
                     self._isCubeClicked = true;
                     //console.log(self.data[materialIdx]);
                 }

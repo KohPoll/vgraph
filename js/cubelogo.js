@@ -52,13 +52,13 @@
     animate();
 
     container.bind('click', function(evt) {
-            $(this).fadeOut('600');
-            $('#content').fadeOut('700');
-            $('#painter').fadeIn('800');
+        $(this).fadeOut('600');
+        $('#content').fadeOut('700');
+        $('#painter').fadeIn('800');
 
-            AnimScene._isCubeClicked = false;
-            AnimScene.cube.entity.position.x = 20;
-            AnimScene.cube.entity.position.y = -20;
-            AnimScene.cube.entity.position.z = -8000;
-        });
+        AnimScene._isCubeClicked = false;
+        AnimScene.cube.entity.position.x = 20;
+        AnimScene.cube.entity.position.y = -20;
+        AnimScene.cube.entity.position.z = -8000;
+    });
 })();
