@@ -14,6 +14,10 @@
     <script src="js/lib/excanvas.min.js"></script>
     <![endif]-->
 
+	<!-- prefixfree lib -->
+	<script type="text/javascript" src="js/lib/prefixfree.min.js"></script>
+	
+	
     <!-- flot lib -->
     <script src="js/lib/flot/jquery.flot.js"></script>
     <script src="js/lib/flot/jquery.flot.selection.js"></script>
@@ -40,38 +44,6 @@
 		</ul>
 	</div>
     <div id="container">
-		<!--
-		<div>
-			<button class="input type check" value="full-word">词频(全文)</button>
-			<button class="input type" value="">Input2</button>
-		</div>
-		<div>
-			<button class="input level check" value="0">All</button>
-			<button class="input level" value="1">A</button>
-			<button class="input level" value="2">B</button>
-		</div>
-		-->
-		<!--
-        <div class="control" id="J_control">
-            <p>
-				<label title=""><input type="radio" name="type" value="full-word" checked="checked" />词频(全文)</label>
-                
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word" />无词性词(总表)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-mainland" />无词性词(大陆)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-HMT" />无词性词(港澳台)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-JK" />无词性词(日韩)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-other" />无词性词(其他)</label>
-            </p>
-            <p>
-              	<label title=""><input type="radio" name="level" value="0" checked="checked" />全图</label>
-               	<label title=""><input type="radio" name="level" value="1" />甲级细节图</label>
-              	<label title=""><input type="radio" name="level" value="2" />乙级细节图</label>
-                <label title=""><input type="radio" name="level" value="3" />丙级细节图</label>
-                <label title=""><input type="radio" name="level" value="4" />丁级细节图</label>
-            </p>
-        </div>
-		-->
-		
         <div id="graph">
             <!--<div class="preload"></div>-->
             <div id="placeHolder"></div>
@@ -169,49 +141,6 @@ $(document).ready(function() {
 			
 		drawGraph(graphType, graphLevel);
 	}
-
-	/*
-    var control = $('#J_control'),
-		graphCache = {}, 
-        graphLevelMapperCache = {},
-        drawGraph = function(iType, iLevel) {
-            var checkedItem, 
-                graph, graphType, graphLevel, 
-                reqUrl;
-			
-            // checkedItem = $(':checked');
-			checkedItem = $('.checked');
-			// console.log(checkedItem);
-            graphType = checkedItem[0].value;
-            graphLevel = checkedItem[1].value;
-			
-            // console.log(graphType+','+graphLevel);
-			
-			// console.log(graphCache);
-            graph = graphCache[graphType];
-            if (graph) {			
-				graph.rerenderPlot();
-				graph.levelMapper[graphLevel]();
-            } else {
-                reqUrl = baseUrl + '?type=' + graphType;
-                $.getJSON(reqUrl, function(resp) {
-                    graph = new Graph('#placeHolder', '#dataContainer', graphType);
-                    graph.render(resp);
-                    graph.levelMapper[graphLevel]();
-
-                    graphCache[graphType] = graph;
-                });
-            }
-        };
-		*/
-		
-		/*
-    control.bind('click', function(evt) {
-        var target = evt.target;
-        if (target.tagName === 'INPUT') {
-            drawGraph();
-        }
-    });*/
 	
 	$('#level-menu button').click(function () {
 		$('#level-menu button').removeClass('checked');
@@ -231,9 +160,6 @@ $(document).ready(function() {
     // drawGraph();
 	
 	drawGraph('full-word', 0);
-
-	
-
 });
 </script>
 </body>
