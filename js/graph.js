@@ -265,9 +265,11 @@
 				// console.log('idx: %d', idx);
 				// console.log(self.dataInfo[idx]);
 				// console.log('this.dataInfo[idx].d = %d', self.dataInfo[idx].d);
+                //console.log(idx);
+                //console.log(this.dataInfo[idx])
                 var info = tmpl(tmplStr, {
                         n: num, 
-                        d: self.dataInfo[idx].d, 
+                        d: this.dataInfo[idx].d, 
                         f: this.dataInfo[idx].f, 
                         l: fToText[this.dataInfo[idx].l - 1]
                     });
@@ -325,7 +327,7 @@
 				self.scrollTo(num, color);
 			};
 
-        placeHolder.bind('plothover', function(evt, pos, item) {
+        placeHolder.unbind('plothover').bind('plothover', function(evt, pos, item) {
             if (item) {
                 if (prevPoint != item.dataIndex) {
                     prevPoint = item.dataIndex;
@@ -351,7 +353,7 @@
 		// if(! $.browser.msie) console.time('rangeSelect');
         var self = this;
 
-        this.placeHolder.bind('plotselected', function(evt, ranges) {
+        this.placeHolder.unbind('plotselected').bind('plotselected', function(evt, ranges) {
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
