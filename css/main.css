@@ -4,6 +4,7 @@ body, h1, h2, ul, li, p {
     margin: 0;
     padding: 0;
 }
+
 ul {
     list-style: none;
 }
@@ -68,6 +69,9 @@ body {
 	border-left: 2px solid white;
 	border-right: 2px solid white;
 	padding-left: 2px;
+	
+	margin-top: 16px;
+	margin-bottom: 16px;
 }
 
 #type-menu li {
@@ -87,6 +91,7 @@ body {
 	border: 0px;
 	color: white;
 	vertical-align: bottom;
+	font-size: 18px;
 }
 
 #type-menu button:hover {
@@ -102,28 +107,12 @@ body {
 #type-menu-1 {
 	background-image: url("../image/first-1.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(206, 78, 38)), 
-					color-stop(0.5, rgb(223, 139, 99)), 
-					color-stop(0.51, rgb(194, 45, 11)), 
-					to(rgb(165, 24, 24))
-				);
-				
-	/* background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#1a82f7), to(#2F2727)); */
-
-	/* Safari 5.1, Chrome 10+ */
-	background: background: -webkit-linear-gradient(top, #2F2727, #1a82f7, #2F2727, #1a82f7, #2F2727);
-
-	/* Firefox 3.6+ */
-	background: -moz-linear-gradient(top, #2F2727, #1a82f7);
-
-	/* IE 10 */
-	background: -ms-linear-gradient(top, #2F2727, #1a82f7);
-
-	/* Opera 11.10+ */
-	background: -o-linear-gradient(top, #2F2727, #1a82f7);
+	background: linear-gradient(top, 
+		rgb(206, 78, 38), 
+		rgb(223, 139, 99) 50%,
+		rgb(194, 45, 11) 51%,
+		rgb(165, 24, 24)
+	);
 }
 
 #type-menu-1:hover {
@@ -132,29 +121,24 @@ body {
 
 #type-menu-1.checked {
 	background-image: url("../image/first-2.png");
-	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(206, 78, 38)), 
-					color-stop(0.5, rgb(223, 139, 99)), 
-					color-stop(0.51, rgb(194, 45, 11)), 
-					to(rgb(165, 24, 24))
-				);
-
+				
+	background: linear-gradient(top, 
+		rgb(206, 78, 38), 
+		rgb(223, 139, 99) 50%,
+		rgb(194, 45, 11) 51%,
+		rgb(165, 24, 24)
+	);
 }
 
 #type-menu-2 {
 	background-image: url("../image/second-1.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(239, 146, 35)), 
-					color-stop(0.5, rgb(253, 185, 90)), 
-					color-stop(0.51, rgb(233, 124, 35)), 
-					to(rgb(202, 84, 27))
-				);
+	background: linear-gradient(top, 
+		rgb(239, 146, 35), 
+		rgb(253, 185, 90) 50%,
+		rgb(233, 124, 35) 51%,
+		rgb(202, 84, 27)
+	);
 }
 
 #type-menu-2:hover {
@@ -164,27 +148,23 @@ body {
 #type-menu-2.checked {
 	background-image: url("../image/second-2.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(239, 146, 35)), 
-					color-stop(0.5, rgb(253, 185, 90)), 
-					color-stop(0.51, rgb(233, 124, 35)), 
-					to(rgb(202, 84, 27))
-				);
+	background: linear-gradient(top, 
+		rgb(239, 146, 35), 
+		rgb(253, 185, 90) 50%,
+		rgb(233, 124, 35) 51%,
+		rgb(202, 84, 27)
+	);
 }
 
 #type-menu-3 {
 	background-image: url("../image/third-1.png");
-	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(170, 180, 60)), 
-					color-stop(0.5, rgb(188, 212, 101)), 
-					color-stop(0.51, rgb(143, 173, 40)), 
-					to(rgb(129, 157, 55))
-				);
+				
+	background: linear-gradient(top, 
+		rgb(170, 180, 60), 
+		rgb(188, 212, 101) 50%,
+		rgb(143, 173, 40) 51%,
+		rgb(129, 157, 55)
+	);
 }
 
 #type-menu-3:hover {
@@ -194,27 +174,23 @@ body {
 #type-menu-3.checked {
 	background-image: url("../image/third-2.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(170, 180, 60)), 
-					color-stop(0.5, rgb(188, 212, 101)), 
-					color-stop(0.51, rgb(143, 173, 40)), 
-					to(rgb(129, 157, 55))
-				);
+	background: linear-gradient(top, 
+		rgb(170, 180, 60), 
+		rgb(188, 212, 101) 50%,
+		rgb(143, 173, 40) 51%,
+		rgb(129, 157, 55)
+	);
 }
 
 #type-menu-4 {
 	background-image: url("../image/forth-1.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(81, 190, 158)), 
-					color-stop(0.5, rgb(129, 221, 196)), 
-					color-stop(0.51, rgb(49, 187, 149)), 
-					to(rgb(12, 145, 99))
-				);
+	background: linear-gradient(top, 
+		rgb(81, 190, 158),
+		rgb(129, 221, 196) 50%,
+		rgb(49, 187, 149) 51%,
+		rgb(12, 145, 99)
+	);
 }
 
 #type-menu-4:hover {
@@ -224,27 +200,23 @@ body {
 #type-menu-4.checked {
 	background-image: url("../image/forth-2.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(81, 190, 158)), 
-					color-stop(0.5, rgb(129, 221, 196)), 
-					color-stop(0.51, rgb(49, 187, 149)), 
-					to(rgb(12, 145, 99))
-				);
+	background: linear-gradient(top, 
+		rgb(81, 190, 158),
+		rgb(129, 221, 196) 50%,
+		rgb(49, 187, 149) 51%,
+		rgb(12, 145, 99)
+	);
 }
 
 #type-menu-5 {
 	background-image: url("../image/fifth-1.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(79, 156, 192)), 
-					color-stop(0.5, rgb(111, 178, 216)), 
-					color-stop(0.51, rgb(58, 143, 191)), 
-					to(rgb(33, 107, 144))
-				);
+	background: linear-gradient(top, 
+		rgb(79, 156, 192),
+		rgb(111, 178, 216) 50%,
+		rgb(58, 143, 191) 51%,
+		rgb(33, 107, 144)
+	);
 }
 
 #type-menu-5:hover {
@@ -254,14 +226,12 @@ body {
 #type-menu-5.checked {
 	background-image: url("../image/fifth-2.png");
 	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(79, 156, 192)), 
-					color-stop(0.5, rgb(111, 178, 216)), 
-					color-stop(0.51, rgb(58, 143, 191)), 
-					to(rgb(33, 107, 144))
-				);
+	background: linear-gradient(top, 
+		rgb(79, 156, 192),
+		rgb(111, 178, 216) 50%,
+		rgb(58, 143, 191) 51%,
+		rgb(33, 107, 144)
+	);
 }
 
 #level-menu {
@@ -283,10 +253,18 @@ body {
 
 #level-menu button {
 	line-height: 20px;
-	width: 80px;
+	width: 100px;
 	height: 20px;
 	border: 0px;
+	color: white;
 	border-radius: 4px;
+	
+	background: linear-gradient(top, 
+		rgb(233, 97, 12),
+		rgb(253, 159, 81) 50%,
+		rgb(241, 109, 31) 51%,
+		rgb(202, 73, 7)
+	);
 }
 
 #level-menu button:hover {
@@ -297,85 +275,6 @@ body {
 #level-menu button.checked  {
 	height: 24px;
 	font-weight: bold;
-}
-
-#level-menu-0 {
-	background-image: url("../image/all-1.png");
-	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(81, 190, 158)), 
-					color-stop(0.5, rgb(129, 221, 196)), 
-					color-stop(0.51, rgb(49, 187, 149)), 
-					to(rgb(12, 145, 99))
-				);
-}
-
-#level-menu-0:hover {
-	background-image: url("../image/all-2.png");
-}
-
-#level-menu-0.checked {
-	background-image: url("../image/all-2.png");
-	
-	/* Safari 4-5, Chrome 1-9 */
-	background: -webkit-gradient(linear, 
-					left top, left bottom, 
-					from(rgb(81, 190, 158)), 
-					color-stop(0.5, rgb(129, 221, 196)), 
-					color-stop(0.51, rgb(49, 187, 149)), 
-					to(rgb(12, 145, 99))
-				);
-}
-
-#level-menu-1 {
-	background-image: url("../image/a-1.png");
-}
-
-#level-menu-1:hover {
-	background-image: url("../image/a-2.png");
-}
-
-#level-menu-1.checked {
-	background-image: url("../image/a-2.png");
-}
-
-#level-menu-2 {
-	background-image: url("../image/b-1.png");
-}
-
-#level-menu-2:hover {
-	background-image: url("../image/b-2.png");
-}
-
-#level-menu-2.checked {
-	background-image: url("../image/b-2.png");
-}
-
-
-#level-menu-3 {
-	background-image: url("../image/c-1.png");
-}
-
-#level-menu-3:hover {
-	background-image: url("../image/c-2.png");
-}
-
-#level-menu-3.checked {
-	background-image: url("../image/c-2.png");
-}
-
-#level-menu-4 {
-	background-image: url("../image/d-1.png");
-}
-
-#level-menu-4:hover {
-	background-image: url("../image/d-2.png");
-}
-
-#level-menu-4.checked {
-	background-image: url("../image/d-2.png");
 }
 
 #graph {
@@ -397,14 +296,25 @@ body {
     width: 210px;
     /* height: 50px; */
     margin-top: 7px;
-    border: 1px solid #333;
-	background-color: lightyellow;
+    /* border: 1px solid #333; */
+	background-color: black;
+	color: white;
 	border-radius: 8px;
 }
 
 .x-desp, .y-desp {
     position: absolute;
+	color: white;
 }
+
+.x-desp {
+	left: 450px;
+}
+
+.y-desp {
+	bottom: 250px;
+}
+
 #dataContainer {
     padding: 5px;
 }
@@ -414,6 +324,9 @@ body {
     font-size: 16px;
     color: #666;
     border-bottom: 1px solid #eee;
+	text-align: center;
+	font-weight: bold;
+	font-family: '黑体';
 }
 
 .control {
@@ -503,6 +416,19 @@ body {
 	display: inline-block;
 	height: 18px;
 	overflow: hidden;
+}
+
+
+#data_head {
+	margin-top: 1px;
+	font-family: '黑体';
+	margin-top: 1px;
+	margin-bottom: 16px;
+}
+
+#data_list {
+	margin-top: 16px;
+	margin-bottom: 16px;
 }
 
 #data-table {

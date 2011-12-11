@@ -14,6 +14,10 @@
     <script src="js/lib/excanvas.min.js"></script>
     <![endif]-->
 
+	<!-- prefixfree lib -->
+	<script type="text/javascript" src="js/lib/prefixfree.min.js"></script>
+	
+	
     <!-- flot lib -->
     <script src="js/lib/flot/jquery.flot.js"></script>
     <script src="js/lib/flot/jquery.flot.selection.js"></script>
@@ -42,7 +46,7 @@
 
         <div id="side">
             <div id="dataContainer">
-                <h2>临近的数据信息</h2>
+                <h2>附近数据</h2>
             </div>
         </div>
 
@@ -102,6 +106,7 @@ $(document).ready(function() {
 		        $('#type-menu button').removeClass('checked');
 		        $(this).addClass('checked');
 		
+
 		        self.redrawGraph();
 	        });
         }
