@@ -19,13 +19,43 @@
     <script src="js/lib/flot/jquery.flot.selection.js"></script>
 </head>
 <body>
+	<div id="head">
+		<!-- <h1 class="title">
+			<img src="image/title.png" alt="国际汉语教材编写指南&nbsp;|&nbsp;语言要素统计" />
+		</h1> -->
+		<h1 class="title">
+			<span class="main-title">国际汉语教材编写指南</span>
+			<span>&nbsp;|&nbsp;</span>
+			<span class="sub-title">语言要素统计</span>
+		</h1>
+	</div>
+	<div id="nav">
+		<ul id="type-menu">
+			<li><button id="type-menu-1" value="full-word" class="checked" >单字</button></li>
+			<li><button id="type-menu-2" value="noncharacteristic-word" >词汇（无词性）</button></li>
+			<li><button id="type-menu-3" value="noncharacteristic-word-mainland" >词汇（有词性）</button></li>
+			<li><button id="type-menu-4" value="noncharacteristic-word-HMT" >语法点</button></li>
+			<li><button id="type-menu-5" value="noncharacteristic-word-JK" >文化点</button></li>
+			<!-- <li><button id="type-menu-6" value="noncharacteristic-word-other" >无词性词（其他）</button></li> -->
+		</ul>
+	</div>
     <div id="container">
-        <h1 class="title">字-词-语法点-全文词频-全文字频-统计图</h1>
-
+		<!--
+		<div>
+			<button class="input type check" value="full-word">词频(全文)</button>
+			<button class="input type" value="">Input2</button>
+		</div>
+		<div>
+			<button class="input level check" value="0">All</button>
+			<button class="input level" value="1">A</button>
+			<button class="input level" value="2">B</button>
+		</div>
+		-->
+		<!--
         <div class="control" id="J_control">
             <p>
 				<label title=""><input type="radio" name="type" value="full-word" checked="checked" />词频(全文)</label>
-                <!--<label title=""><input type="radio" name="type" value="full-character" />字频(全文)统计</label>-->
+                
                 <label title=""><input type="radio" name="type" value="noncharacteristic-word" />无词性词(总表)</label>
                 <label title=""><input type="radio" name="type" value="noncharacteristic-word-mainland" />无词性词(大陆)</label>
                 <label title=""><input type="radio" name="type" value="noncharacteristic-word-HMT" />无词性词(港澳台)</label>
@@ -40,11 +70,12 @@
                 <label title=""><input type="radio" name="level" value="4" />丁级细节图</label>
             </p>
         </div>
-
+		-->
+		
         <div id="graph">
             <!--<div class="preload"></div>-->
             <div id="placeHolder"></div>
-            <br/><br/><br/><br/><br/><br/>
+            <!-- <br/><br/><br/><br/><br/><br/> -->
         </div>
 
        <div id="side">
@@ -52,6 +83,15 @@
         </div>
 
         <br style="clear:both;" />
+		<div id="level-menu">
+			<ul>
+				<li><button id="level-menu-0" value="0" class="checked">全图</button></li>
+				<li><button id="level-menu-1" value="1">甲级细节图</button></li>
+				<li><button id="level-menu-2" value="2">乙级细节图</button></li>
+				<li><button id="level-menu-3" value="3">丙级细节图</button></li>
+				<li><button id="level-menu-4" value="4">丁级细节图</button></li>
+			</ul>
+		</div>
     </div>
 
     <!--<div class="preload"></div>-->
@@ -60,23 +100,98 @@
 
 <script>
 $(document).ready(function() {
+	var dataCache = {}, 
+		baseUrl = 'data/poll-data.php',
+		graphTypeArr = [
+			'full-word', 
+			'noncharacteristic-word',
+			'noncharacteristic-word-mainland',
+			'noncharacteristic-word-HMT',
+			'noncharacteristic-word-JK',
+			'noncharacteristic-word-other'
+		],
+		
+		loadAllData = function () 
+		{
+			var getdata = function (i) {
+				var graphType = graphTypeArr[i];
+				var reqUrl = baseUrl + '?type=' + graphType;
+			
+				$.getJSON(reqUrl, function(resp) {
+					dataCache[graphType] = resp;
+				});
+			}
+			
+			for (var i = 0; i < graphTypeArr.length; i++)
+			{
+				getdata(i);
+			}
+		};
+		
+	// loadAllData();
+	
+	// console.log(dataCache);
+		
+	var drawGraphByJson = function (json_data, type, level)
+	{
+		level = level || '0';
+		type = type || 'full-word';
+		graph = new Graph('#placeHolder', '#dataContainer', type);
+		graph.render(json_data);
+		graph.levelMapper[level]();
+	};
+	
+	var drawGraph = function (type, level)
+	{
+	
+		if (dataCache[type])
+		{
+			drawGraphByJson(dataCache[type], type, level);
+		}
+		else 
+		{
+			var reqUrl = baseUrl + '?type=' + type;
+			
+			$.getJSON(reqUrl, function(resp) {
+				drawGraphByJson(resp, type);
 
+				dataCache[type] = resp;
+			});
+		}
+	};
+	
+	var redrawGraph = function ()
+	{
+		checkedItem = $('.checked');
+
+		var graphType = checkedItem[0].value;
+		var graphLevel = checkedItem[1].value;
+			
+		drawGraph(graphType, graphLevel);
+	}
+
+	/*
     var control = $('#J_control'),
-        graphCache = {}, graphLevelMapperCache = {},
-        drawGraph = function() {
+		graphCache = {}, 
+        graphLevelMapperCache = {},
+        drawGraph = function(iType, iLevel) {
             var checkedItem, 
                 graph, graphType, graphLevel, 
-                baseUrl = 'data/poll-data.php', reqUrl;
-
-            checkedItem = $(':checked');
+                reqUrl;
+			
+            // checkedItem = $(':checked');
+			checkedItem = $('.checked');
+			// console.log(checkedItem);
             graphType = checkedItem[0].value;
             graphLevel = checkedItem[1].value;
-
-            //console.log(graphType+','+graphLevel);
+			
+            // console.log(graphType+','+graphLevel);
+			
+			// console.log(graphCache);
             graph = graphCache[graphType];
-            if (graph) {
-                graph.rerenderPlot();
-                graph.levelMapper[graphLevel]();
+            if (graph) {			
+				graph.rerenderPlot();
+				graph.levelMapper[graphLevel]();
             } else {
                 reqUrl = baseUrl + '?type=' + graphType;
                 $.getJSON(reqUrl, function(resp) {
@@ -88,14 +203,36 @@ $(document).ready(function() {
                 });
             }
         };
-
+		*/
+		
+		/*
     control.bind('click', function(evt) {
         var target = evt.target;
         if (target.tagName === 'INPUT') {
             drawGraph();
         }
-    });
-    drawGraph();
+    });*/
+	
+	$('#level-menu button').click(function () {
+		$('#level-menu button').removeClass('checked');
+		$(this).addClass('checked');
+		
+		redrawGraph();
+	});
+	
+	$('#type-menu button').click(function (event) {
+		event.preventDefault()
+		$('#type-menu button').removeClass('checked');
+		$(this).addClass('checked');
+		
+		redrawGraph();
+	});
+		
+    // drawGraph();
+	
+	drawGraph('full-word', 0);
+
+	
 
 });
 </script>
