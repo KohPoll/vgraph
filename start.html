@@ -48,8 +48,10 @@
         </div>
 
         <div id="container">
-            <div id="graph"><div id="placeHolder"></div></div>
-
+            <div id="graph">
+				<div id="placeHolder"></div>
+				<div id="go-back-button"><img src="image/go-back.png" alt="Go Back" /></div>
+			</div>
             <div id="side">
                 <div id="dataContainer">
                     <h2>附近数据</h2>
@@ -114,6 +116,22 @@
 		
 		        self.redrawGraph();
 	        });
+			
+			
+			$('#go-back-button').fadeTo('fast', 0.2);
+			$('#go-back-button').hover(
+				function () {
+					$(this).fadeTo('fast', 1);
+				},
+				function () {
+					$(this).fadeTo('fast', 0.2);
+				} 
+			);
+			/*
+			$('#go-back-button').click( function () {
+				
+			});
+			*/
         }
     };
     window.GraphAPI.init();
