@@ -1,386 +1,474 @@
 (function($) {
+    //console.log($);
 
-    // 超微型模板引擎
-    if (typeof $.tmpl === 'undefined') {
-        $.tmpl = {};
+    function Graph(placeHolder, dataContainer, type) {
+        this.placeHolder = $(placeHolder);
+        this.dataContainer = $(dataContainer);
+        this.type = type;
 
-        $.tmpl['object'] = function(str, data) {
-            var rst = '', reg = /\{(\w+)\}/g;
-            rst = str.replace(reg, function(match, dataKey) {
-                return data[dataKey];
-            });
-            return rst;
-        };
-
-        $.tmpl['for'] = function(str, data) {
-            var rst = '';
-            for (var i=0, len=data.length; i<len; ++i) {
-                var item = data[i];
-                rst += $.tmpl['object'](str, item);
-            }
-            return rst;
-        };
-    }
-
-    /*
-     * opts.
-     *  placeHolder
-     *  data
-     *  skin
-     */
-    function Graph(opts) {
-        // 画布的容器
-        this.placeHolder = opts.placeHolder && $(placeHolder);
-
-        // data结构 (见下Graph.data)
-        this.data = $.extend({}, Graph.data, opts.data || {});
-
-        // skin结构 (见下Graph.skin)
-        this.skin = $.extend({}, Graph.skin, opts.skin || {});
-
-        // plot实例
-        this.plot = null;
-        // plot渲染用数据
-        this.plotData = null;
-        // plot渲染用配置
-        this.plotOpt = null;
-
-        //每级别的数据总量,第0个元素代表总数据量 [amount, amount1, amount2, ... ]
-        this.levelData = null; 
-        //每级别在坐标上的对应区域,第0个元素代表整个区域 [[b,e], [b,e], ... ] 
-        this.levelToRange = null;  
-
-        this._init();
+        this.plotData = [];
+        this.plotOpt = {};
     };
 
-    Graph.skin = {
-        labelSuffix: '数据', //label后缀,可使用模板
-        colors: ['lightcoral', 'lightblue', 'lightgreen', 'sandybrown'], //分块数据的color，和类别对应
-        labels: ['甲级', '乙级', '丙级', '丁级'], //分块数据的label，和类别对应
-        coords: ['编 号', '频<br/>数']
+    Graph.prototype.renderPlot = function() {
+		// if(! $.browser.msie) console.time('renderPlot');
+        this.initPlotData();
+        this.initPlotOpt();
+
+        this.initLevelMapper();
+
+		// if(! $.browser.msie) console.time('renderPlot / plot');
+        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
+		// if(! $.browser.msie) console.timeEnd('renderPlot / plot');
+		// for(var i=0,l=this.dataInfo.length; i<l; ++i) {
+			console.log(this.dataInfo[6397].d);
+		// }
+		// if(! $.browser.msie) console.timeEnd('renderPlot');
     };
-    Graph.data = {
-        value: [], //实际数据
-        level: 4  //数据类别
+
+    Graph.prototype.rerenderPlot = function() {
+		// if(! $.browser.msie) console.time('rerenderPlot');
+        this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
+		// if(! $.browser.msie) console.timeEnd('rerenderPlot');
+	};
+
+    Graph.prototype.initLevelMapper = function() {
+		// if(! $.browser.msie) console.time('initLevelMapper');
+        var levelInterval = [0], 
+            plotData = this.plotData, 
+            levelMapper, self = this;
+
+        for (var i=0, levelCount=plotData.length; i<levelCount; ++i) {
+            var next = levelInterval[levelInterval.length - 1] + plotData[i].data.length;
+            levelInterval.push(next);
+        }
+
+        levelMapper = [
+                function() {
+                    var len = levelInterval.length;
+                    self.updateRange(levelInterval[0], levelInterval[len - 1] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[0], levelInterval[1] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[1], levelInterval[2] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[2], levelInterval[3] - 1);
+                },
+                function() {
+                    self.updateRange(levelInterval[3], levelInterval[4] - 1);
+                }
+            ];
+        
+        this.levelMapper = levelMapper;
+		// if(! $.browser.msie) console.timeEnd('initLevelMapper');
     };
 
-    Graph.util = {
-        toNestedArray: function(n) { // [[], [], ...,]共n个
-            var rst = [];
-            for (var i=0; i<n; ++i) {
-                rst[i] = [];
-            }
-            return rst;
-        },
-        /*
-         * renderData的每一个元素是属于同一类别的数据组成的数组, 
-         * renderData[i] 可取到类别(i+1)的所有数据的坐标([num, freq])
-         * renderData[i].length 可取到已渲染出来的类别(i+1)的数据总量
-         */
-        normalizeToRenderData: function(data, startIndex) { // data: {value, level}
-            var dataValue = data.value, dataLevel = data.level,
-                startIndex = startIndex || 0,
-                renderData = this.toNestedArray(dataLevel); // [ [[num, freq], ...], [[num, freq], ...], ... ]
+    Graph.prototype.initPlotData = function() {
+		// if(! $.browser.msie) console.time('initPlotData');
+        var color = ['#e44323', '#3686cc', '#6caf24', '#806061'], 
+            level = ['甲', '乙', '丙', '丁'],
+            i = 0, j = 0, len, item, 
+            plotData = this.plotData, dataInfo = this.dataInfo;
 
-            if (dataValue && dataValue.length) {
-                for (var i=0, len=dataValue.length; i<len; ++i) {
-                    var item = dataValue[i], // {d:data, f:freq, l:level}
-                        l = item.l, f = item.f;
+        if (dataInfo && dataInfo.length) {
+            for (i=0, len=dataInfo.length; i<len; ++i) {
+                item = dataInfo[i];
 
-                    renderData[l - 1].push([(startIndex + 1), f]);
-                    startIndex += 1;
+                // 按聚类级别的数据
+                if (typeof plotData[item.l - 1] === 'undefined') {
+                    plotData[item.l - 1] = {};
+
+                    plotData[item.l - 1]['data'] = [];
+                    plotData[item.l - 1]['data'].push([(i + 1), item.f]);
+                } else {
+                    plotData[item.l - 1]['data'].push([(i + 1), item.f]);
                 }
             }
 
-            return renderData;
-        },
-        sliceToRenderData: function(data, start, end) {
-            var sliceData = data.value.slice(start - 1, end);
-            return this.normalizeToRenderData({value: sliceData, level: data.level}, start - 1);
-        },
-        sliceDataByCenter: function(dataValue, center, radius) {
-            radius = radius || 5;
-
-            var len = dataValue.length,
-                range = (function () {
-                    var startIndex = (center - radius) - 1,
-                        endIndex = (center + radius) - 1;
-
-			        if (startIndex < 0) { startIndex = 0; }
-			        if (endIndex > len) { endIndex = len - 1; }
-			
-                    return [startIndex, endIndex + 1];
-                })();
-                
-            return dataValue.slice(range[0], range[1]);
-        }
-    };
-
-        
-    var GP = Graph.prototype;
-
-    GP.renderByLevel = function(levelIndex) { // 0,1,2,3,..., level
-        levelIndex = levelIndex || 0;
-
-        var range = this.levelToRange[levelIndex];
-
-        /*
-        if (levelIndex !== 0) {
-            this._updateRange(range[0], range[1]);
-        } else { //为0画全局，直接渲染，不update range
-            this._render(null, $.extend(true, {}, this.plotOpt, {xaxis: {min: range[0], max: range[1]}}));
-        }
-        */
-        this._updateRange(range[0], range[1]);
-    };
-
-    GP.update = function(opts) {
-        this.data = $.extend(true, {}, Graph.data, opts.data);
-        this.skin = $.extend(true, {}, Graph.skin, opts.skin);
-
-        this._initData();
-        this._initPlotOpt();
-    };
-
-    GP._init = function() {
-        this._initData();
-
-        this._initPlotOpt();
-
-        this._initRangeSelect();
-
-        this._initHover();
-
-        this._initCoordsInfo();
-    };
-
-    GP._initData = function() {
-        var renderData = Graph.util.normalizeToRenderData(this.data);
-
-        // init levelData
-        this.levelData = this._generateLevelData(renderData);
-
-        // init levelToRange
-        this.levelToRange = this._generateLevelToRange(this.levelData);
-
-        // init plotData
-        this.plotData = this._generatePlotData(renderData);
-    };
-
-    GP._generateLevelToRange = function(levelData) {
-        var rst = [-1], s = e = 0;
-
-        for (var i=1, len=levelData.length; i<len; ++i) {
-            e = s + levelData[i];
-            rst.push([s + 1, e]);
-            s = e;
-        }
-        rst[0] = [1, e];
-
-        return rst;
-    };
-
-    GP._generateLevelData = function(renderData) { 
-        var levelData = [this.data.value.length];
-
-        for (var i=0, len=renderData.length; i<len; ++i) {
-            levelData.push(renderData[i].length);
+            for (i = 0, len=plotData.length; i<len; ++i) {
+                item = plotData[i];
+                item.color = color[i];
+                item.label = level[i] + this.getLabelTailByType() + '(' + item.data.length + '个)';
+            }
         }
 
-        return levelData;
+		// if(! $.browser.msie) console.timeEnd('initPlotData');		
+    };
+    Graph.prototype.getLabelTailByType = function() {
+		// if(! $.browser.msie) console.time('getLabelTailByType');
+        var typeToLabelTail = {
+            'full-character': '级字',
+            'full-word': '级词',
+            'noncharacteristic-word': '级无词性词',
+            'noncharacteristic-word-mainland': '级无词性词(大陆)',
+            'noncharacteristic-word-HMT': '级无词性词(港澳台)',
+            'noncharacteristic-word-JK': '级无词性词(日韩)',
+            'noncharacteristic-word-other': '级无词性词(其他)'
+        };
+
+		// if(! $.browser.msie) console.timeEnd('getLabelTailByType');
+        return typeToLabelTail[this.type];
     };
 
-    GP._generatePlotData = function(renderData) { 
-        var plotData = [], util = Graph.util;
-
-        for (var i=0, len=renderData.length; i<len; ++i) {
-            var series = { }, renderSerieData = renderData[i];
-            if (renderSerieData.length === 0) continue;
-
-            series['color'] = this.skin.colors[i] || '#333';
-            series['label'] = (this.skin.labels[i] || '') + 
-                $.tmpl['object'](this.skin.labelSuffix, {count: this.levelData[i + 1]});
-            series['data'] = renderData[i];
-
-            plotData.push(series);
-        }
-
-        return plotData;
-    };
-
-    GP._initPlotOpt = function() {
+    Graph.prototype.initPlotOpt = function() {
+		// if(! $.browser.msie) console.time('initPlotOpt');
         this.plotOpt = {
             series: {
                 lines: { show: true },
                 points: { show: true }
             },
-            xaxis: {
-                tickDecimals: 0
-            },
             grid: {
                 hoverable: true,
-                clickable: true
+                clickable: true,
+				backgroundColor: { colors: ["#FFD986", "#F9B447"] }
             },
+			xaxis: {
+				color : 'white'
+			},			
+			yaxis: {
+				color : 'white'
+			},
             selection: {
                 mode: 'x'
             }
         };
+		// if(! $.browser.msie) console.timeEnd('initPlotOpt');
     };
 
-    GP._updateRange = function(s, e) {
-        var renderData = Graph.util.sliceToRenderData(this.data, s, e),
-            plotData = this._generatePlotData(renderData),
-            plotOpt = $.extend(true, {}, this.plotOpt, {
-                xaxis: {min: s, max: e}
-            });
+	Graph.prototype.printDataList = function (target_id) {
+		var fToText = ['甲', '乙', '丙', '丁'];
+		$('#data_list').remove();
+		$('#data_head').remove();
+		
+		$('<ul id="data_head" >').html(
+			'<span class="f">词频</span>' +
+			'<span class="d">内容</span>' +
+			'<span class="l">等级</span>')
+		.css({ 'height' : 15 })
+		.appendTo('#' + target_id);
+		
+		$('<ul id="data_list" >')
+		.css({
+			'overflow-y': 'scroll',
+			'height' 	: 315
+		})
+		.appendTo('#' + target_id);
+		
+		for (var i = 0; i < this.dataInfo.length; i++)
+		{
+			var obj = this.dataInfo[i];
 
-        this._render(plotData, plotOpt);
+			// console.log('%o', obj);
+			
+			$('<li id="num' + (i + 1) + '">')
+			.html(
+				// '<span class="n">' + (i + 1) + '</span>' +
+				'<span class="f">' + obj.f + '</span>' +
+				'<span class="d" title="' + obj.d + '">' + obj.d + '</span>' +
+				'<span class="l">' + fToText[obj.l - 1] + '</span>'
+			)
+			.appendTo('#data_list');
+			// break;
+		}
+	};
+	
+	Graph.prototype.scrollTo = function (num, color)
+	{	
+		$('#data_list').children().css({
+			'background-color':	'',
+			'color' : 'black'
+		});
+		
+		var ul_element = $('#data_list')[0],
+			lis_length = ul_element.childNodes.length,
+			offset_height = ul_element.offsetHeight,
+			scroll_height = ul_element.scrollHeight,
+			offset = scroll_height / lis_length * (num - 1) - offset_height / 2,
+			color = color || 'lightgrey',
+			self = this;
+	
+		if (offset < 0) { offset = 0; }
+	
+		// console.log('%o', $('#data_list'));
+		// console.log('arg: %d', num);
+		// console.log('offset_height: %d, scroll_height: %d', offset_height, scroll_height);
+		// console.log('children: %d', lis_length);
+		// console.log('offset: %d', offset);
+		
+		$('#data_list').animate(
+			{ 'scrollTop': offset }, 
+			10, 
+			function () 
+			{
+				$('#num' + num).css({
+					'background-color' : color,
+					'border-radius' : 5,
+					'color' : 'white'
+				});
+			}
+		);
+	};
+	
+    Graph.prototype.render = function(data) {
+		// if(! $.browser.msie) console.time('render');
+        this.dataInfo = data; //按编号的数据,缓存
+		
+		// console.log('%o', this.dataInfo);
+		this.printDataList('dataContainer');
+		// this.scrollTo(0);
+		
+        this.hoverTip();
+        this.rangeSelect();
+
+		// if(! $.browser.msie) console.time('render / renderPlot');
+        this.renderPlot();
+		// if(! $.browser.msie) console.timeEnd('render / renderPlot');
+
+        this.renderAxeTip();
+		// if(! $.browser.msie) console.timeEnd('render');
     };
 
-    GP._render = function(plotData, plotOpt) {
-        plotData = plotData || this.plotData;
-        plotOpt = plotOpt || this.plotOpt;
+    Graph.prototype.renderAxeTip = function() {
+		// if(! $.browser.msie) console.time('renderAxeTip');
+        var yTip = $('<p class="y-desp">').html('频<br/>数'),
+            xTip = $('<p class="x-desp">').html('编 号');
 
-        this.plot = $.plot(this.placeHolder, plotData, plotOpt);
+        $('#graph').append(yTip).append(xTip);
+		// if(! $.browser.msie) console.timeEnd('renderAxeTip');
     };
 
-    GP._initCoordsInfo = function() {
-        var yInfo, xInfo,
-            placeHolder = this.placeHolder, container = this.placeHolder.parent(),
-            fix = 15, height = placeHolder.height();
-
-        xInfo = $('<p>').css({
-                            position: 'absolute',
-                            right: fix,
-                            top: height - fix
-                        }).html(this.skin.coords[0]),
-
-        yInfo = $('<p>').css({
-                            position: 'absolute',
-                            left: 0,
-                            top: -fix
-                        }).html(this.skin.coords[1]);
-
-        container.css({position: 'relative'})
-                 .append(yInfo).append(xInfo);
+    Graph.prototype.renderData = function(data) {
+		// if(! $.browser.msie) console.time('renderData');
+        this.dataContainer.html(data);
+		// if(! $.browser.msie) console.timeEnd('renderData');
     };
     
-    GP._initRangeSelect = function() {
+    Graph.prototype.hoverTip = function() {
+		// if(! $.browser.msie) console.time('hoverTip');
+        var prevPoint = null, self = this,
+            placeHolder = this.placeHolder,
+            tmpl = function(str, data) {
+                var rst = '', reg = /\{(\w+)\}/g;
+                rst = str.replace(reg, function(match, dataKey) {
+                    return data[dataKey];
+                });
+                return rst;
+            },
+            tmplStr = '<ul><li><em>编号: </em>{n}</li>' +
+                        '<li><em>内容: </em>{d}</li>' +
+                        '<li><em>频数: </em>{f}</li>' +
+                        '<li><em>级别: </em>{l}</li></ul>',
+            fToText = ['甲', '乙', '丙', '丁'],
+            showDataInfo = function(mouseX, mouseY, num, bgColor) {
+                var idx = parseInt(num, 10) - 1;
+				// console.log('idx: %d', idx);
+				// console.log(self.dataInfo[idx]);
+				// console.log('this.dataInfo[idx].d = %d', self.dataInfo[idx].d);
+                var info = tmpl(tmplStr, {
+                        n: num, 
+                        d: self.dataInfo[idx].d, 
+                        f: this.dataInfo[idx].f, 
+                        l: fToText[this.dataInfo[idx].l - 1]
+                    });
+                //console.log(this.dataInfo[idx]);
+                //console.log(info);
+                                
+                $('<div id="datainfo">')
+                    .html(info)
+                    .css({
+                        backgroundColor: bgColor,
+                        top: mouseY - 20,
+                        left: mouseX + 5
+                    }).appendTo('body').fadeIn(200);
+            },
+			clearDataRangeList = function ()
+			{
+				if ($('#data-table')) 
+				{
+					$('#data-table').fadeOut("slow");
+					$('#data-table').remove();
+				}
+			},
+			showDataRangeList = function(center, radius) 
+			{
+				clearDataRangeList();
+				// console.log(self.dataInfo);
+				var show_data = self.getRangeByCenter(self.dataInfo, center, radius);
+				var generateTable = function (data)
+				{
+					var table_body = '';
+					for (var index in data)
+					{
+						var obj = data[index];
+						table_body += '<tr><td>' + [obj.d, obj.f, fToText[obj.l - 1]].join('</td><td>') + '</td></tr>'; 
+					}
+					
+					// console.log(str);
+					var table_head = '<tr><th>' + ['词汇', '词频', '词级'].join('</th><th>') + '</th></tr>';
+
+					return '<table>' + table_head + table_body + '</table>';
+				}
+
+				table_html = generateTable(show_data);
+				$('<div id="data-table">')
+					.html(table_html)
+					.appendTo('#dataContainer')
+					.fadeIn("slow");
+			}
+			hiddenDataRangeList = function ()
+			{
+				$('#dataContainer').html('');
+			},
+			slideDataList = function(num, color)
+			{
+				self.scrollTo(num, color);
+			};
+
+        placeHolder.bind('plothover', function(evt, pos, item) {
+            if (item) {
+                if (prevPoint != item.dataIndex) {
+                    prevPoint = item.dataIndex;
+
+                    $('#datainfo').remove();
+                    var num = item.datapoint[0]; //编号
+                    showDataInfo.apply(self, [item.pageX, item.pageY, num, item.series.color]);
+				
+					// console.log(item);	
+					// showDataRangeList(num, 5);
+					slideDataList(num, item.series.color);
+                }
+            } else {
+                $('#datainfo').remove();
+				// hiddenDataRangeList();
+                prevPoint = null;
+            }
+        });
+		// if(! $.browser.msie) console.timeEnd('hoverTip');
+    };
+
+    Graph.prototype.rangeSelect = function() {
+		// if(! $.browser.msie) console.time('rangeSelect');
         var self = this;
 
-        self.placeHolder.bind('plotselected', function(evt, ranges) {
+        this.placeHolder.bind('plotselected', function(evt, ranges) {
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
-            self._updateRange(s, e);
+            self.updateRange(s, e);
         });
+		
+		// if(! $.browser.msie) console.timeEnd('rangeSelect');
     };
 
-    GP._initHover = function() {
-        var self = this, 
-            util = Graph.util, dataValue = this.data.value, labels = this.skin.labels,
-            num, curPointData, curPointRangeData, prevPoint = null,
-            tip, table;
-                
-        tip = new Tip({
-                id: 'datainfo',
-                template: '<ul><li><em>编号: </em>{n}</li>' +
-                            '<li><em>内容: </em>{d}</li>' +
-                            '<li><em>频数: </em>{f}</li>' +
-                            '<li><em>级别: </em>{l}</li></ul>'
-            });
+    Graph.prototype.updateRange = function(s, e) {
+		// if(! $.browser.msie) console.time('updateRange');
+        var self = this;
+        var newPlotData = self.updatePlotData(s, e);
 
-        table = new Table({
-                id: 'datatable',
-                container: '#dataContainer',
-                template: {
-                    header: '<tr><th>内容</th><th>频数</th><th>级别</th></tr>',
-                    row: '<tr><td>{content}</td><td>{freq}</td><td>{level}</td></tr>'
-                }
-            });
+        self.plotOpt = $.extend(true, {}, self.plotOpt, {
+            xaxis: {min: s, max: e+1}
+        });
 
-        self.placeHolder.bind('plothover', function(evt, pos, item) {
-            if (item) {
-                if (prevPoint !== item.dataIndex) {
-                    prevPoint = item.dataIndex;
-                    
-                    num = parseInt(item.datapoint[0], 10); //编号
+		// if(! $.browser.msie) console.time('updateRange / plot');
+        self.plot = $.plot(self.placeHolder, newPlotData, self.plotOpt);
+		// if(! $.browser.msie) console.timeEnd('updateRange / plot');
+		
+		// if(! $.browser.msie) console.timeEnd('updateRange');
+	};
 
-                    curPointData = dataValue[num - 1];
-                    tip.render({n: num, d: curPointData.d, f: curPointData.f, l: labels[curPointData.l - 1]})
-                       .show({top: item.pageY - 20, left: item.pageX + 5, background: item.series.color});
-
-                    var d = util.sliceDataByCenter(dataValue, num);
-                    curPointRangeData = [];
-                    for (var i=0, len=d.length; i<len; ++i) {
-                        var cur = d[i];
-                        curPointRangeData.push({content: cur.d, freq: cur.f, level: labels[cur.l - 1]});
-                    }
-                    table.render(curPointRangeData).show();
-                }             
-            } else {
-                prevPoint = null;
-
-                tip.hide();
-                //table.hide();
+    Graph.prototype.updatePlotData = function(s, e) {
+		// if(! $.browser.msie) console.time('updatePlotData');
+        var sliceFrArr = function (arr, head, tail) {
+            var length_total = 0;
+            var length_array = [];
+            for (var i=0, len=arr.length; i<len; ++i)
+            {
+                var item = arr[i];
+                length_total += item.data.length;
+                length_array.push(length_total);
             }
-        });
+
+            var re_arr = [];
+            var cur_position = function(head) { 
+                for (var i = 0; i < length_array.length; i++)
+                {
+                    if (head < length_array[i])
+                    {
+                        return i;
+                    }
+                }	
+            };
+            var cur_obj = cur_position(head);	
+            var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
+            for (var i = head; i <= tail; i++)
+            {
+                if (i >= length_array[cur_obj]) {
+                    cur_obj += 1;
+
+                    if (tmp_obj.data.length != 0)
+                    {
+                        re_arr.push(tmp_obj);
+                        tmp_obj = { data: [] };
+                        tmp_obj.color = arr[cur_obj].color;
+                        tmp_obj.label = arr[cur_obj].label;
+                    }
+                }
+
+                var offset = 0;
+                if (cur_obj > 0) { offset = i - length_array[cur_obj - 1]; }
+                else { offset = i; }
+
+                tmp_obj.data.push(arr[cur_obj].data[offset]);
+
+                if (i == tail) 
+                {	
+                    re_arr.push(tmp_obj);
+                    break;
+                }
+            }
+
+            return re_arr;
+        };
+
+        var rst = sliceFrArr(this.plotData, s, e);
+		// if(! $.browser.msie) console.timeEnd('updatePlotData');
+        return rst;
     };
 
+	Graph.prototype.getRangeByCenter = function (coordinate, center, radius)
+	{
+		// if(! $.browser.msie) console.time('getRangeByCenter');
+		radius = radius || 5;
 
-    /*
-     * opts.
-     *  id, template, container.
-     */
-    function Tip(opts) {
-        this.template = opts.template || '';
-        this.container = opts.container || 'body';
-        this.id = opts.id || 'tip' + +new Date();
-    }
-    Tip.prototype.render = function(data) {
-        this.tip && this.tip.fadeOut('fast').remove(); //先清除
+		var computeHeadAndTail = function (center) {
+			var head = center - radius - 1;
+			var tail = center + radius - 1;
 
-        this.tip = $('<div>').attr('id', this.id);
-        this.tip.html($.tmpl['object'](this.template, data));
-        return this;
-    };
-    Tip.prototype.show = function(style, speed) {
-        speed = speed || 500;
-        this.tip && (this.tip.css(style).appendTo(this.container).fadeIn(speed));
-        return this;
-    };
-    Tip.prototype.hide = function() {
-        this.tip && this.tip.fadeOut('fast').remove();
-        return this;
-    };
+			if (head < 0) { head = 0; }
+			if (tail > coordinate.length) 
+			{
+				tail = coordinate.length - 1;
+			}
 
-    /*
-     * opts.
-     * id, template{header, row}, container.
-     */
-    function Table(opts) {
-        this.template = opts.template || {};
-        this.container = $(opts.container) || 'body';
-        this.id = opts.id || 'table' + +new Date();
-    }
-    Table.prototype.render = function(data) {
-        this.table && this.table.fadeOut('slow').remove(); //先清除
+			return { 'head': head, 'tail': tail };
+		}
 
-        var row = $.tmpl['for'](this.template.row, data);
-        this.table = $('<table>').attr('id', this.id);
-        this.table.html(this.template.header + row);
+		var head_tail = computeHeadAndTail(center);
+		// console.log(head_tail);
+		
+		var ret_arr = [];	
 
-        return this;
-    };
-    Table.prototype.show = function(speed) {
-        speed = speed || 'slow';
-        this.table && this.table.appendTo(this.container).fadeIn(speed);
-        return this;
-    };
-    Table.prototype.hide = function() {
-        this.table && this.table.fadeOut('slow').remove();
-    };
+		for(var i = head_tail.head; i <= head_tail.tail; i++)
+		{
+			ret_arr.push(coordinate[i]);
+		}
 
+		// if(! $.browser.msie) console.timeEnd('getRangeByCenter');
+		return ret_arr;	
+	}
 
     window.Graph = Graph;
 })(jQuery);
