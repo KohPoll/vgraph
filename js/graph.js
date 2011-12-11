@@ -381,35 +381,6 @@
         this.table && this.table.fadeOut('slow').remove();
     };
 
-	Graph.prototype.getRangeByCenter = function (coordinate, center, radius)
-	{
-		radius = radius || 5;
-
-		var computeHeadAndTail = function (center) {
-			var head = center - radius - 1;
-			var tail = center + radius - 1;
-
-			if (head < 0) { head = 0; }
-			if (tail > coordinate.length) 
-			{
-				tail = coordinate.length - 1;
-			}
-
-			return { 'head': head, 'tail': tail };
-		}
-
-		var head_tail = computeHeadAndTail(center);
-		// console.log(head_tail);
-		
-		var ret_arr = [];	
-
-		for(var i = head_tail.head; i <= head_tail.tail; i++)
-		{
-			ret_arr.push(coordinate[i]);
-		}
-
-		return ret_arr;	
-	}
 
     window.Graph = Graph;
 })(jQuery);
