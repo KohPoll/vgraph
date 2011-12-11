@@ -8,6 +8,7 @@
 
         this.plotData = [];
         this.plotOpt = {};
+		this.selectRecord = [];
     };
 
     Graph.prototype.renderPlot = function() {
@@ -220,6 +221,8 @@
 		
         this.hoverTip();
         this.rangeSelect();
+		
+		this.goBack();
 
 		// if(! $.browser.msie) console.time('render / renderPlot');
         this.renderPlot();
@@ -262,11 +265,6 @@
             fToText = ['一', '二', '三', '四'],
             showDataInfo = function(mouseX, mouseY, num, bgColor) {
                 var idx = parseInt(num, 10) - 1;
-				// console.log('idx: %d', idx);
-				// console.log(self.dataInfo[idx]);
-				// console.log('this.dataInfo[idx].d = %d', self.dataInfo[idx].d);
-                //console.log(idx);
-                //console.log(this.dataInfo[idx])
                 var info = tmpl(tmplStr, {
                         n: num, 
                         d: this.dataInfo[idx].d, 
@@ -357,11 +355,46 @@
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
+			self.saveRange(s, e);
             self.updateRange(s, e);
         });
 		
 		// if(! $.browser.msie) console.timeEnd('rangeSelect');
     };
+	
+	Graph.prototype.saveRange = function (s, e)
+	{
+		this.selectRecord.push({
+			start: s,
+			end: e
+		});
+	}
+	
+	Graph.prototype.goBack = function ()
+	{
+		var self = this,
+			recordStack = this.selectRecord;
+		
+		this.saveRange(0, this.dataInfo.length - 1);
+		$('#go-back-button').click( function () {
+			var getRecord = function ()
+			{
+				var size = recordStack.length;
+				if (size == 1 || size == 2) { return recordStack[0]; }
+				else {
+					recordStack.pop();
+					return recordStack.pop();
+				}
+			};
+			
+			var record = getRecord();
+
+			if (record)
+			{
+				self.updateRange(record.start, record.end);
+			}
+		});
+	}
 
     Graph.prototype.updateRange = function(s, e) {
 		// if(! $.browser.msie) console.time('updateRange');
@@ -382,9 +415,13 @@
     Graph.prototype.updatePlotData = function(s, e) {
 		// if(! $.browser.msie) console.time('updatePlotData');
         var sliceFrArr = function (arr, head, tail) {
+			// alert('h');
+			return arr;
+			
+			console.log(arr);
             var length_total = 0;
             var length_array = [];
-            for (var i=0, len=arr.length; i<len; ++i)
+            for (var i = 0, len = arr.length; i < len; ++i)
             {
                 var item = arr[i];
                 length_total += item.data.length;
@@ -402,6 +439,7 @@
                 }	
             };
             var cur_obj = cur_position(head);	
+			console.log(cur_obj);
             var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
             for (var i = head; i <= tail; i++)
             {

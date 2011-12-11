@@ -275,6 +275,13 @@ body {
 #level-menu button.checked  {
 	height: 24px;
 	font-weight: bold;
+	
+	background: linear-gradient(top, 
+		rgb(81, 190, 158),
+		rgb(129, 221, 196) 50%,
+		rgb(49, 187, 149) 51%,
+		rgb(12, 145, 99)
+	);
 }
 
 #graph {
@@ -285,6 +292,7 @@ body {
 	/*background-image: url('../image/working.jpg');*/
 	background-repeat: no-repeat;
 }
+<<<<<<< HEAD:css/vgraph-main.css
 #usageTip {
     color: #696969;
     font-weight: bold;
@@ -296,6 +304,20 @@ body {
     top: 25px;
     left: 105px;
 }
+=======
+
+#go-back-button {
+	position: absolute;
+	left: 80px;
+	bottom: 370px;
+	cursor: pointer;
+}
+
+#go-back-button > * {
+	cursor: pointer;
+}
+
+>>>>>>> 71a4e23da116ecb52e1ba0aac0c3110e29962fdd:css/main.css
 #placeHolder {
     width: 750px;
     height: 400px;
