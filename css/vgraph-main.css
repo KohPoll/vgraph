@@ -292,7 +292,6 @@ body {
 	/*background-image: url('../image/working.jpg');*/
 	background-repeat: no-repeat;
 }
-<<<<<<< HEAD:css/vgraph-main.css
 #usageTip {
     color: #696969;
     font-weight: bold;
@@ -302,9 +301,8 @@ body {
     border-radius: 5px;
     position: absolute;
     top: 25px;
-    left: 105px;
+    left: 140px;
 }
-=======
 
 #go-back-button {
 	position: absolute;
@@ -317,7 +315,6 @@ body {
 	cursor: pointer;
 }
 
->>>>>>> 71a4e23da116ecb52e1ba0aac0c3110e29962fdd:css/main.css
 #placeHolder {
     width: 750px;
     height: 400px;

@@ -51,7 +51,8 @@
         <div id="container">
             <div id="graph">
                 <div id="placeHolder"></div>
-                <p id="usageTip">可以使用鼠标拖拽框选范围(按住鼠标左键,移动鼠标以框选范围)</p>
+                <p id="usageTip">可使用鼠标拖拽框选范围(按住鼠标左键,移动鼠标以框选范围)</p>
+				<div id="go-back-button" title="返回上一框选范围"><img src="image/go-back.png" alt="Go Back" /></div>
             </div>
 
             <div id="side">
@@ -118,6 +119,16 @@
 		
 		        self.redrawGraph();
 	        });
+
+			$('#go-back-button').fadeTo('fast', 0.2);
+			$('#go-back-button').hover(
+				function () {
+					$(this).fadeTo('fast', 1);
+				},
+				function () {
+					$(this).fadeTo('fast', 0.2);
+				} 
+			);
         }
     };
     window.GraphAPI.init();
