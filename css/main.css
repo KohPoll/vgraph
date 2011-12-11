@@ -1,14 +1,47 @@
 @charset "utf-8";
 
+body, h1, h2, ul, li, p {
+    margin: 0;
+    padding: 0;
+}
+
+ul {
+    list-style: none;
+}
+
+
 body,
 button, input, select, textarea {
    /* font: 14px/1.5 tahoma, arial; */
     color: #333;
 }
 
-body {
-	background-color: #333;
+
+body { 
+    /*background: #333; */
+    background: url(../image/bg1.jpg) no-repeat;
 }
+
+#painter {
+    /*background: #333;*/
+    position: relative;
+}
+#cubeLogo {
+    position: absolute;
+    left: 320px;
+    top: 30px;
+    width: 100px;
+    height: 100px;
+    border: 1px solid red;
+    display: none;
+    cursor: pointer;
+    z-index: 10;
+}
+#content {
+    width: 990px;
+    margin: 0 auto;
+}
+
 
 #container {
     width: 990px;
@@ -26,6 +59,9 @@ body {
 	border-left: 2px solid white;
 	border-right: 2px solid white;
 	padding-left: 2px;
+	
+	margin-top: 16px;
+	margin-bottom: 16px;
 }
 
 #type-menu li {
@@ -45,6 +81,7 @@ body {
 	border: 0px;
 	color: white;
 	vertical-align: bottom;
+	font-size: 18px;
 }
 
 #type-menu button:hover {
@@ -243,6 +280,7 @@ body {
     height: 400px;
     margin-left: 25px;
 }
+
 #side {
     float: right;
     width: 210px;
@@ -255,14 +293,28 @@ body {
 
 .x-desp, .y-desp {
     position: absolute;
+	color: white;
 }
+
 .x-desp {
-    top: 390px;
-    left: 355px;
+	left: 450px;
 }
+
 .y-desp {
-    left: 0;
-    top: 160px;
+	bottom: 250px;
+}
+
+#dataContainer {
+    padding: 5px;
+}
+#dataContainer h2 {
+    margin: 0 0 0 10px;
+    padding-bottom: 5px;
+    font-size: 16px;
+    color: #666;
+    border-bottom: 1px solid #eee;
+	text-align: center;
+	font-weight: bold;
 }
 
 .control {
@@ -294,7 +346,7 @@ body {
 #datainfo {
     position: absolute;
     display: none;
-    border: 1px solid #fdd;
+    border: 1px solid #333;
     border-radius: 5px;
     padding: 5px;
     background: #fee;
@@ -313,6 +365,16 @@ body {
     text-align: right;
 }
 
+#datatable {
+	display: none;
+    border: 1px solid #333;
+    border-radius: 5px;
+}
+#datatable th, #datatable td {
+	width: 80px;
+    text-align: center;
+}
+
 .preload {
     width: 80px;
     height: 80px;
@@ -324,6 +386,8 @@ body {
 
 #dataContainer ul {
 	padding-left: 5px;
+	margin-top: 16px;
+	margin-bottom: 16px;
 }
 
 #dataContainer li {

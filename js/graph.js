@@ -21,7 +21,7 @@
         this.plot = $.plot(this.placeHolder, this.plotData, this.plotOpt);
 		// if(! $.browser.msie) console.timeEnd('renderPlot / plot');
 		// for(var i=0,l=this.dataInfo.length; i<l; ++i) {
-			console.log(this.dataInfo[6397].d);
+			//console.log(this.dataInfo[6397].d);
 		// }
 		// if(! $.browser.msie) console.timeEnd('renderPlot');
     };
@@ -153,7 +153,7 @@
 		$('<ul id="data_list" >')
 		.css({
 			'overflow-y': 'scroll',
-			'height' 	: 315
+			'height' 	: 270
 		})
 		.appendTo('#' + target_id);
 		
