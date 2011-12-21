@@ -279,7 +279,6 @@
         }
         top = mouseY - 20;
         left = mouseX + 5;
-        console.log(mouseY);
 
         $('<div id="datainfo">')
             .html(info)
