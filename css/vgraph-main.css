@@ -393,6 +393,7 @@ body {
     padding: 5px;
     background: #fee;
 	color: white;
+    width: 100px;
 }
 #datainfo ul {
     list-style: none;

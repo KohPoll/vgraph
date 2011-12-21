@@ -80,6 +80,10 @@
         dataCache: {},
         init: function() {
             this.bindEvent();
+            this.graph = null;
+        },
+        searchGraph: function(s) {
+            this.graph && this.graph.search(s);
         },
         drawGraphByJson: function(jsonData, type, level) {
             level = level || '0';
@@ -87,6 +91,7 @@
             var graph = new Graph('#placeHolder', '#dataContainer', type);
             graph.render(jsonData);
             graph.levelMapper[level]();
+            this.graph = graph;
         },
         drawGraph: function(type, level) {
             //console.log(this.dataCache);

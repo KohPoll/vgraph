@@ -249,11 +249,8 @@
 		// if(! $.browser.msie) console.timeEnd('renderData');
     };
     
-    Graph.prototype.hoverTip = function() {
-		// if(! $.browser.msie) console.time('hoverTip');
-        var prevPoint = null, self = this,
-            placeHolder = this.placeHolder,
-            tmpl = function(str, data) {
+    function showDataInfo(mouseX, mouseY, num, bgColor, fToText, container) {
+        var tmpl = function(str, data) {
                 var rst = '', reg = /\{(\w+)\}/g;
                 rst = str.replace(reg, function(match, dataKey) {
                     return data[dataKey];
@@ -263,28 +260,42 @@
             tmplStr = '<ul><li><em>编号: </em>{n}</li>' +
                         '<li><em>内容: </em>{d}</li>' +
                         '<li><em>频数: </em>{f}</li>' +
-                        '<li><em>级别: </em>{l}</li></ul>',
+                        '<li><em>级别: </em>{l}</li></ul>';
+
+        var idx = parseInt(num, 10) - 1;
+        var info = tmpl(tmplStr, {
+                n: num, 
+                d: this.dataInfo[idx].d, 
+                f: this.dataInfo[idx].f, 
+                l: fToText[this.dataInfo[idx].l - 1]
+            });
+        //console.log(this.dataInfo[idx]);
+        //console.log(info);
+                        
+        var top, left;
+        if (container) {
+            mouseY = 400 - (mouseY / this.dataInfo[0].f * 400);
+            mouseX = (mouseX / this.dataInfo.length * 700) + 40;
+        }
+        top = mouseY - 20;
+        left = mouseX + 5;
+        console.log(mouseY);
+
+        $('<div id="datainfo">')
+            .html(info)
+            .css({
+                backgroundColor: bgColor,
+                top: top,
+                left: left
+            }).appendTo(container || 'body').fadeIn(200);
+    };
+
+    Graph.prototype.hoverTip = function() {
+		// if(! $.browser.msie) console.time('hoverTip');
+        var prevPoint = null, self = this,
+            placeHolder = this.placeHolder,
             fToText = ['一', '二', '三', '四'],
-            showDataInfo = function(mouseX, mouseY, num, bgColor) {
-                var idx = parseInt(num, 10) - 1;
-                var info = tmpl(tmplStr, {
-                        n: num, 
-                        d: this.dataInfo[idx].d, 
-                        f: this.dataInfo[idx].f, 
-                        l: fToText[this.dataInfo[idx].l - 1]
-                    });
-                //console.log(this.dataInfo[idx]);
-                //console.log(info);
-                                
-                $('<div id="datainfo">')
-                    .html(info)
-                    .css({
-                        backgroundColor: bgColor,
-                        top: mouseY - 20,
-                        left: mouseX + 5
-                    }).appendTo('body').fadeIn(200);
-            },
-			clearDataRangeList = function ()
+		clearDataRangeList = function ()
 			{
 				if ($('#data-table')) 
 				{
@@ -334,7 +345,7 @@
 
                     $('#datainfo').remove();
                     var num = item.datapoint[0]; //编号
-                    showDataInfo.apply(self, [item.pageX, item.pageY, num, item.series.color]);
+                    showDataInfo.apply(self, [item.pageX, item.pageY, num, item.series.color, fToText]);
 				
 					// console.log(item);	
 					// showDataRangeList(num, 5);
@@ -504,7 +515,22 @@
 
 		// if(! $.browser.msie) console.timeEnd('getRangeByCenter');
 		return ret_arr;	
-	}
+    };
+
+    Graph.prototype.search = function(key) {
+        $('#datainfo').remove();
+
+        var dataInfo = this.dataInfo,
+            color = Graph.__color;
+
+        for (var i=0, len=dataInfo.length; i<len; ++i) {
+            if (dataInfo[i].d === key) {
+                this.scrollTo(i+1, color[dataInfo[i].l-1]);
+
+                showDataInfo.apply(this, [i, dataInfo[i].f, i+1, color[dataInfo[i].l-1], ['一','二','三','四'], this.placeHolder]);
+            }
+        }
+    };
 
     window.Graph = Graph;
 })(jQuery);
