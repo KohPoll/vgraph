@@ -77,7 +77,7 @@
             plotData = this.plotData, dataInfo = this.dataInfo;
 
         if (dataInfo && dataInfo.length) {
-            for (i=0, len=dataInfo.length; i<len; ++i) {
+            for (i = 0, len = dataInfo.length; i < len; ++i) {
                 item = dataInfo[i];
 
                 // 按聚类级别的数据
@@ -428,7 +428,9 @@
     Graph.prototype.updatePlotData = function(s, e) {
 		// if(! $.browser.msie) console.time('updatePlotData');
         var sliceFrArr = function (arr, head, tail) {
-			
+
+			// console.log(arr);
+
             var length_total = 0;
             var length_array = [];
             for (var i = 0, len = arr.length; i < len; ++i)
@@ -449,6 +451,9 @@
                 }	
             };
             var cur_obj = cur_position(head);	
+
+			// console.log(cur_obj);
+
             var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
             for (var i = head; i <= tail; i++)
             {

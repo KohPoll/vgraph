@@ -359,6 +359,25 @@ body {
 	font-family: '黑体';
 }
 
+#search-submit {
+	background-image: url("../image/small-magnifier-20.png");
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+	vertical-align: sub;
+}
+
+.search-key-blank {
+	color: lightgrey;
+	font-style: italic;
+}
+
+.search-key {
+	color: block;
+	font-style: normal;
+}
+
 .control {
     margin: 0 0 10px 25px;
 }

@@ -57,6 +57,11 @@
 
             <div id="side">
                 <div id="dataContainer">
+					<div id="search-zone">
+						<input type="text" id="search-key" class="search-key-blank" value="Search" />
+						<!--<input type="submit" id="search-submit" />-->
+						<a id="search-submit" ></a>
+					</div>
                     <h2>数据窗口</h2>
                 </div>
             </div>
@@ -134,6 +139,26 @@
 					$(this).fadeTo('fast', 0.2);
 				} 
 			);
+			
+			$('#search-key').focusin(function () {
+				var classname = 'search-key-blank';
+				
+				if ($(this).hasClass(classname))
+				{
+					$(this).removeClass(classname)
+						   .addClass('search-key')
+						   .val('');
+				}
+			});
+			
+			$('#search-submit').click(function () {
+				var input = $('#search-key'),
+					search_key = input.val();
+					
+				console.log(search_key);
+				
+				// 
+			});
         }
     };
     window.GraphAPI.init();
