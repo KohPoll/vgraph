@@ -67,9 +67,11 @@
 		// if(! $.browser.msie) console.timeEnd('initLevelMapper');
     };
 
+    Graph.__color = ['#e44323', '#3686cc', '#6caf24', '#806061'];
+
     Graph.prototype.initPlotData = function() {
 		// if(! $.browser.msie) console.time('initPlotData');
-        var color = ['#e44323', '#3686cc', '#6caf24', '#806061'], 
+        var color = Graph.__color,
             level = ['一', '二', '三', '四'],
             i = 0, j = 0, len, item, 
             plotData = this.plotData, dataInfo = this.dataInfo;
@@ -415,10 +417,7 @@
     Graph.prototype.updatePlotData = function(s, e) {
 		// if(! $.browser.msie) console.time('updatePlotData');
         var sliceFrArr = function (arr, head, tail) {
-			// alert('h');
-			return arr;
 			
-			console.log(arr);
             var length_total = 0;
             var length_array = [];
             for (var i = 0, len = arr.length; i < len; ++i)
@@ -439,7 +438,6 @@
                 }	
             };
             var cur_obj = cur_position(head);	
-			console.log(cur_obj);
             var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
             for (var i = head; i <= tail; i++)
             {
