@@ -75,7 +75,7 @@
             plotData = this.plotData, dataInfo = this.dataInfo;
 
         if (dataInfo && dataInfo.length) {
-            for (i=0, len=dataInfo.length; i<len; ++i) {
+            for (i = 0, len = dataInfo.length; i < len; ++i) {
                 item = dataInfo[i];
 
                 // 按聚类级别的数据
@@ -423,7 +423,7 @@
 			// alert('h');
 			return arr;
 			
-			console.log(arr);
+			// console.log(arr);
             var length_total = 0;
             var length_array = [];
             for (var i = 0, len = arr.length; i < len; ++i)
@@ -444,7 +444,7 @@
                 }	
             };
             var cur_obj = cur_position(head);	
-			console.log(cur_obj);
+			// console.log(cur_obj);
             var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
             for (var i = head; i <= tail; i++)
             {
