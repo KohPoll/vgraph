@@ -65,6 +65,8 @@ var AnimScene = {
     },
     //materialIndex到地区的映射(0,1->全部(0),2->大陆(1),3->港澳(2),4->日韩(3),5->其它(4)
     _regionMapper: [0, 0, 1, 2, 3, 4], 
+    //0~4到对应区域的映射 全部(0),大陆(1),港澳(2),日韩(3),其它(4)
+    _regionTextMapper: ['全部', '大陆', '港澳台', '日韩', '其它'],
     _fetch: function(url) {
        // simulate request data by ajax.
         this._isLoaded = false;
@@ -74,13 +76,6 @@ var AnimScene = {
                 self._data = data;
                 self._isLoaded = true;
             });
-
-        /*
-        this.timerId = setTimeout(function() {
-                self._isLoaded = true;
-                clearTimeout(self.timerId);
-            }, 1000);
-            */
     },
     _bindEvents: function() {
         var self = this;
@@ -112,6 +107,8 @@ var AnimScene = {
                     window.GraphAPI.dataCache = self._data[region];
                     window.GraphAPI.drawGraph('char', 0);
 
+                    $('#regionInfo').html(self._regionTextMapper[region]);
+
                     self._isCubeClicked = true;
                     //console.log(self.data[materialIdx]);
                 }
@@ -142,8 +139,8 @@ var AnimScene = {
         } 
         if (this._isCubeClicked) {
             cubeEnt.position.z -= 30;
-            cubeEnt.position.x -= 60;
-            cubeEnt.position.y += 50;
+            cubeEnt.position.x += 65;
+            cubeEnt.position.y += 40;
             if (cubeEnt.position.z <= -10000) cubeEnt.position.z = -10000;
         }
 
@@ -157,7 +154,7 @@ var AnimScene = {
         } else {
             $(this.container).fadeOut(800);
             $('#content').fadeIn(600, function() {
-                    $('#cubeLogo').fadeIn(900);
+                    //$('#cubeNav').fadeIn(900);
                 });
         }
 

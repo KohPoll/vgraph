@@ -3,7 +3,7 @@ ini_set("memory_limit", "64M");
 
 Ob_Start("ob_gzhandler");
 
-$typeMapper = array("char", "cword", "ncword", "cul");
+$typeMapper = array("char", "cword", "ncword", "cul", "gram");
 /* regionMapper = 0 -> 全部, 1 -> 大陆, 2 -> 港澳台, 3 -> 日韩, 4 -> 其它 */
 
 $data = array();

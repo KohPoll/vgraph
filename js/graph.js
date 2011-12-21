@@ -67,9 +67,11 @@
 		// if(! $.browser.msie) console.timeEnd('initLevelMapper');
     };
 
+    Graph.__color = ['#e44323', '#3686cc', '#6caf24', '#806061'];
+
     Graph.prototype.initPlotData = function() {
 		// if(! $.browser.msie) console.time('initPlotData');
-        var color = ['#e44323', '#3686cc', '#6caf24', '#806061'], 
+        var color = Graph.__color,
             level = ['一', '二', '三', '四'],
             i = 0, j = 0, len, item, 
             plotData = this.plotData, dataInfo = this.dataInfo;
@@ -265,14 +267,9 @@
             fToText = ['一', '二', '三', '四'],
             showDataInfo = function(mouseX, mouseY, num, bgColor) {
                 var idx = parseInt(num, 10) - 1;
-				/*
-				console.log('idx: %d', idx);
-				console.log(self.dataInfo[idx]);
-				console.log('this.dataInfo[idx].d = %d', self.dataInfo[idx].d);
-				*/
                 var info = tmpl(tmplStr, {
                         n: num, 
-                        d: self.dataInfo[idx].d, 
+                        d: this.dataInfo[idx].d, 
                         f: this.dataInfo[idx].f, 
                         l: fToText[this.dataInfo[idx].l - 1]
                     });
@@ -330,7 +327,7 @@
 				self.scrollTo(num, color);
 			};
 
-        placeHolder.bind('plothover', function(evt, pos, item) {
+        placeHolder.unbind('plothover').bind('plothover', function(evt, pos, item) {
             if (item) {
                 if (prevPoint != item.dataIndex) {
                     prevPoint = item.dataIndex;
@@ -356,7 +353,7 @@
 		// if(! $.browser.msie) console.time('rangeSelect');
         var self = this;
 
-        this.placeHolder.bind('plotselected', function(evt, ranges) {
+        this.placeHolder.unbind('plotselected').bind('plotselected', function(evt, ranges) {
             var from = ranges.xaxis.from, to = ranges.xaxis.to,
                 s = Math.floor(from) - 1, e = Math.ceil(to) + 1;
 
@@ -420,10 +417,9 @@
     Graph.prototype.updatePlotData = function(s, e) {
 		// if(! $.browser.msie) console.time('updatePlotData');
         var sliceFrArr = function (arr, head, tail) {
-			// alert('h');
-			return arr;
-			
+
 			// console.log(arr);
+
             var length_total = 0;
             var length_array = [];
             for (var i = 0, len = arr.length; i < len; ++i)
@@ -444,7 +440,9 @@
                 }	
             };
             var cur_obj = cur_position(head);	
+
 			// console.log(cur_obj);
+
             var tmp_obj = { data: [], color: arr[cur_obj].color, label: arr[cur_obj].label };
             for (var i = head; i <= tail; i++)
             {

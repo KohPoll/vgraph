@@ -1,6 +1,7 @@
 *.swp
 *.swo
 *.bak
+*.csv
 .svn/
 Thumbs.db*
 vd/
