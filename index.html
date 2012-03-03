@@ -1,103 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
     <meta charset="utf-8" />
 
-    <title>国际汉语教材编写指南</title>
+    <title>CTM-国际汉语教材编写指南-语言要素统计</title>
 
-    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/vgraph-main.css" />
 
-    <!-- base lib -->
-    <script src="js/lib/jquery.js"></script>
+    <script src="js/lib/require-jquery.js"></script>
+    <script>
+        require({
+            urlArgs: 't=' + (new Date()).getTime(),
+            baseUrl: 'js'
+        }, ['main']);
+    </script>
 
-    <!--[if lte IE 8]>
-    <script src="js/lib/excanvas.min.js"></script>
-    <![endif]-->
-
-    <!-- flot lib -->
-    <script src="js/lib/flot/jquery.flot.js"></script>
-    <script src="js/lib/flot/jquery.flot.selection.js"></script>
+	<!-- prefixfree lib -->
+	<script type="text/javascript" src="js/lib/prefixfree.min.js"></script>
 </head>
+
 <body>
-    <div id="container">
-        <h1 class="title">字-词-语法点-全文词频-全文字频-统计图</h1>
+    <div id="painter"></div>
 
-        <div class="control" id="J_control">
-            <p>
-				<label title=""><input type="radio" name="type" value="full-word" checked="checked" />词频(全文)</label>
-                <!--<label title=""><input type="radio" name="type" value="full-character" />字频(全文)统计</label>-->
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word" />无词性词(总表)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-mainland" />无词性词(大陆)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-HMT" />无词性词(港澳台)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-JK" />无词性词(日韩)</label>
-                <label title=""><input type="radio" name="type" value="noncharacteristic-word-other" />无词性词(其他)</label>
-            </p>
-            <p>
-              	<label title=""><input type="radio" name="level" value="0" checked="checked" />全图</label>
-               	<label title=""><input type="radio" name="level" value="1" />甲级细节图</label>
-              	<label title=""><input type="radio" name="level" value="2" />乙级细节图</label>
-                <label title=""><input type="radio" name="level" value="3" />丙级细节图</label>
-                <label title=""><input type="radio" name="level" value="4" />丁级细节图</label>
-            </p>
-        </div>
-
-        <div id="graph">
-            <!--<div class="preload"></div>-->
-            <div id="placeHolder"></div>
-            <br/><br/><br/><br/><br/><br/>
-        </div>
-
-       <div id="side">
-            <div id="dataContainer"></div>
-        </div>
-
-        <br style="clear:both;" />
+    <div id="header">
+        <h1 class="title">
+            <span class="main-title">国际汉语教材编写指南</span>
+            <span>&nbsp;|&nbsp;</span>
+            <span class="sub-title">语言要素统计</span>
+        </h1>
     </div>
 
-    <!--<div class="preload"></div>-->
+    <div id="content" style="display:none;">
+        <div id="cubeNav">
+            <div id="regionInfo">info</div>
+            <div id="cubeBack"><img src="image/cube.gif" width="70" alt="" /></div>
+        </div>
+        
+        <ul id="typeMenu">
+            <li class="t1"><button value="char">单字</button></li>
+            <li class="t2"><button value="ncword">词汇（无词性）</button></li>
+            <li class="t3"><button value="cword">词汇（有词性）</button></li>
+            <li class="t4"><button value="gram">语法点</button></li>
+            <li class="t5"><button value="cul">文化点</button></li>
+        </ul>
 
-    <script src="js/graph.js"></script>
+        <div id="container">
+            <div id="graph">
+                <div id="placeHolder"></div>
 
-<script>
-$(document).ready(function() {
+                <ul id="levelMenu">
+                    <li title="全图"><button value="0">全图</button></li>
+                    <li title="一级细节图"><button value="1">一级细节图</button></li>
+                    <li title="二级细节图"><button value="2">二级细节图</button></li>
+                    <li title="三级细节图"><button value="3">三级细节图</button></li>
+                    <li title="四级细节图"><button value="4">四级细节图</button></li>
+                </ul>
+            </div>
 
-    var control = $('#J_control'),
-        graphCache = {}, graphLevelMapperCache = {},
-        drawGraph = function() {
-            var checkedItem, 
-                graph, graphType, graphLevel, 
-                baseUrl = 'data/poll-data.php', reqUrl;
+            <div id="side">
+                <form id="searchForm">
+                    <input type="text" id="searchKey" class="search-key" value="搜索..." />
+                    <input type="submit" id="searchButton" title="搜索"></a>
+                </form>
 
-            checkedItem = $(':checked');
-            graphType = checkedItem[0].value;
-            graphLevel = checkedItem[1].value;
+                <div id="dataWin">
+                    <h2>数据窗口</h2>
+                </div>
+            </div>
 
-            //console.log(graphType+','+graphLevel);
-            graph = graphCache[graphType];
-            if (graph) {
-                graph.rerenderPlot();
-                graph.levelMapper[graphLevel]();
-            } else {
-                reqUrl = baseUrl + '?type=' + graphType;
-                $.getJSON(reqUrl, function(resp) {
-                    graph = new Graph('#placeHolder', '#dataContainer', graphType);
-                    graph.render(resp);
-                    graph.levelMapper[graphLevel]();
+            <br style="clear:both;" />
 
-                    graphCache[graphType] = graph;
-                });
-            }
-        };
+        </div>
+    </div>
 
-    control.bind('click', function(evt) {
-        var target = evt.target;
-        if (target.tagName === 'INPUT') {
-            drawGraph();
-        }
-    });
-    drawGraph();
-
-});
-</script>
 </body>
 </html>

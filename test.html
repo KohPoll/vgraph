@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>test</title>
+
+    <script src="js/lib/require-jquery.js"></script>
+    <script>
+        require({
+            baseUrl: 'js',
+            urlArgs: 't=' + (new Date()).getTime()
+        }, ['main']);
+    </script>
+</head>
+<body>
+    <div id="painter"></div>
+</body>
+</html>
