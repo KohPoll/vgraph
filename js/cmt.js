@@ -15,7 +15,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
     };//}}}
 
     // 场景逻辑
-    Cmt.Scene = {
+    Cmt.Scene = {//{{{
         init: function () {
             this.painter = $('#painter'); //3d场景绘制画布
             this.content = $('#content'); //内容容器
@@ -179,10 +179,10 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
             painter.on('mousemove', mousemoveFn);   
             back.on('click', backClickFn)
         }//}}}
-    };
+    };//}}}
 
     // 请求及处理/获取数据逻辑
-    Cmt.NetData = {
+    Cmt.NetData = {//{{{
         init: function () {
             // 取数据
             this.fetch();
@@ -242,10 +242,10 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
             return listData;
             // format: [ { l:label, f: frequency, d: content}, ... ]
         }//}}}
-    };
+    };//}}}
 
     // 绘图及交互逻辑
-    Cmt.ViewGraph = {
+    Cmt.ViewGraph = {//{{{
         init: function () {
             //初始化Widget(tip,dataContainer,list)
             this.initWidget();
@@ -470,7 +470,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
                 console.timeEnd('render data container');
             }, 0);
         }//}}}
-    };
+    };//}}}
 
     // 配置参数
     Cmt.config = {//{{{
