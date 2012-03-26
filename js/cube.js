@@ -5,6 +5,7 @@ define(['lib/Three'], function (T) {
      *  - pos: [x, y, z]
      *  - size: 200
      *  - textures: []
+     *  - moveSpped: [x, y, z]
      *  - rotSpeed: [x, y, z]
      *  - scene: 
      */

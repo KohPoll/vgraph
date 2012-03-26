@@ -267,15 +267,15 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
                 tmpl: '<ul><li><em>内容: </em>{d}</li><li><em>频率: </em>{f}</li><li><em>级别: </em>{l}</li></ul>'
             });
 
+            this.list = new Widget.List({
+                cls: 'data-list',
+                tmpl: '<span class="f">{f}</span><span class="d">{d}</span><span class="l">{l}</span>'
+            });
+
             this.dataContainer = new Widget.Base({
                 cls: 'data-container',
                 header: $('<div/>').html('<span class="f">频率</span><span class="d">内容</span><span class="l">级别</span>'),
                 container: $('#dataWin')
-            });
-            
-            this.list = new Widget.List({
-                cls: 'data-list',
-                tmpl: '<span class="f">{f}</span><span class="d">{d}</span><span class="l">{l}</span>'
             });
         },//}}}
         initGraph: function () {//{{{
@@ -310,18 +310,17 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
 
                         return data;
                     },
-                    datarangeselect: function(range) {
-                        //console.log(range);
+                    datarangeselect: function(selectData) {
                     },
                     datapointhover: {
                         hoverin: function(offset, point) {
                             tip.render({
-                                data: {d: point.d, f:point.y, l:point.s.slice(0, 2)}, 
-                                style: {top: offset['top'], left: offset['left'], backgroundColor: point.c}
+                                data: {d: point.data, f:point.y, l:point.label.slice(0, 2)}, 
+                                style: {top: offset['top'], left: offset['left'], backgroundColor: point.color}
                             });
 
                             list.slideTo(point.x, {
-                                'backgroundColor': point.c,
+                                'backgroundColor': point.color,
                                 'border-radius': 3
                             });
                         },
@@ -370,11 +369,10 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
                     ranges = levelData[which],
                     renderData = graph.getRenderData(ranges[0], ranges[1]);
                     
+                //重绘
                 graph.redraw(renderData);
-
                 //重置历史
-                graph.renderhist = [];
-                graph.renderhist[0] = renderData;
+                graph.resetHist(renderData);
             });
             
             // 搜索按钮按下时

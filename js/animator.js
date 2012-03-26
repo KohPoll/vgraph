@@ -10,7 +10,7 @@ define(['jquery', 'lib/Three', 'lib/requestAnimationFrame', 'lib/cancelAnimation
     };//}}}
 
     Animator.opts = {//{{{
-        mediator: null, // must given
+        mediator: null, // 用于在每一帧publish消息
         container: 'body',
         width: window.innerWidth,
         height: window.innerHeight,
@@ -73,7 +73,7 @@ define(['jquery', 'lib/Three', 'lib/requestAnimationFrame', 'lib/cancelAnimation
             }
         }
 
-        mediator.publish('actorsUpdated', this._timer);
+        mediator && mediator.publish && mediator.publish('actorsUpdated', this._timer);
     };//}}}
 
     AP._render = function() {//{{{

@@ -6,11 +6,13 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
         config: {},
         events: {}
     });
+
     g.render([
         {label: '', color: '', points: [[x,y,d], ...]},
         ...
     ]);
     */
+
 
     var noop = function() { };
 
@@ -43,9 +45,10 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
         data = this.events['datapreprocess'](data);
         this.renderdata = this.events['_datapreprocess'](data);
 
-        this.renderhist = [];
-        this.renderhist = [this.renderdata]; //存储框选时的渲染历史(初始是全图)
+        //重置框选时的渲染历史(初始是全图)
+        this.resetHist(this.renderdata);
 
+        //重绘
         this.redraw(this.renderdata);
     };//}}}
 
@@ -57,14 +60,18 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
         this.plot.clearSelection();
     };//}}}
 
+    GP.resetHist = function(initData) {//{{{
+        this.renderhist = [];
+        this.renderhist[0] = initData;
+    };//}}}
+
     GP.getRenderData = function(s, e) {//{{{
         var series, seriesData,
             renderData = this.renderdata, rangeRenderData = [];
 
         if (typeof s == 'undefined' && typeof e == 'undefined') return renderData;
 
-        var i, il, j, jl;
-        for (i=0, il=renderData.length; i<il; ++i) {
+        for (var i=0, len=renderData.length; i<len; ++i) {
             series = $.extend(true, {}, renderData[i]);
             seriesData = $.grep(series.data, function(d, i) {
                 return d[0] >= s && d[0] <= e;
@@ -78,7 +85,7 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
         return rangeRenderData;
     };//}}}
 
-    GP.transToData = function(renderData) {//{{{
+    GP._transToPointData = function(renderData) {//{{{
         var range = [], series, seriesData;
         
         for (var i=0, il=renderData.length; i<il; ++i) {
@@ -87,11 +94,11 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
             for (var j=0, jl=seriesData.length; j<jl; ++j) {
                 if (seriesData[j][2]) {
                     range.push({
-                        x: seriesData[j][0],
-                        y: seriesData[j][1],
-                        c: series.color,
-                        s: series.label,
-                        d: seriesData[j][2]
+                        x: seriesData[j][0],   //点x坐标
+                        y: seriesData[j][1],   //点y坐标
+                        color: series.color,   //点绘制所用color
+                        label: series.label,   //点所在series的label
+                        data: seriesData[j][2] //点的数据
                     });
                 }
             }
@@ -106,15 +113,7 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
             w = placeholder.width(), h = placeholder.height(),
             usage, xDesp, yDesp, backButton;
 
-        usage = $('<div>')
-            .html(uiConfig.tip.content)
-            .addClass(uiConfig.tip.cls)
-            .css({
-                position: 'absolute',
-                top: 25,
-                left: 120
-            });
-
+        //x轴描述
         xDesp = $('<div>')
             .html(uiConfig.coord.x.content)
             .addClass(uiConfig.coord.x.cls)
@@ -124,6 +123,7 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
                 left: w - 50
             });
 
+        //y轴描述
         yDesp = $('<div>')
             .html(uiConfig.coord.y.content)
             .addClass(uiConfig.coord.y.cls)
@@ -133,6 +133,17 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
                 left: -20
             });
 
+        //框选及回退按钮使用提示
+        usage = $('<div>')
+            .html(uiConfig.tip.content)
+            .addClass(uiConfig.tip.cls)
+            .css({
+                position: 'absolute',
+                top: 25,
+                left: 120
+            });
+
+        //回退按钮
         backButton = $('<div>')
                 .html(uiConfig.back.content)
                 .attr('title', uiConfig.back.content)
@@ -152,7 +163,9 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
 
         if (len === 1) return; //全图
 
+        //当前栈顶的渲染历史pop掉
         this.renderhist.pop();
+        //绘制此时历史中最近的渲染数据(上一框选范围)
         len = this.renderhist.length;
         this.redraw(this.renderhist[len - 1]);
     };//}}}
@@ -170,20 +183,23 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
             self.placeholder
                 .unbind('plotselected')
                 .bind('plotselected', function(evt, ranges) {
-                    var start = Math.ceil(ranges.xaxis.from), end = Math.floor(ranges.xaxis.to);
+                    var start = Math.ceil(ranges.xaxis.from), 
+                        end = Math.floor(ranges.xaxis.to);
 
                     if (start > end) {
                         self.plot.clearSelection();
                         return;
                     }
 
+                    //获取框选范围内渲染数据(start->end)并重绘
                     var renderData = self.getRenderData(start, end);
                     self.redraw(renderData);
 
-                    //记录选择的历史
+                    //记录框选的历史渲染数据
                     self.renderhist.push(renderData);
 
-                    rangeselect.apply(self, [self.transToData(renderData)]);
+                    //触发事件回调,同时传递框选范围内点的数据
+                    rangeselect.call(self, self._transToPointData(renderData));
                 });
         }
 
@@ -199,6 +215,7 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
                         if (prevPoint !== item.dataIndex) {
                             prevPoint = item.dataIndex;
 
+                            //用setTimeout延迟下(避免鼠标滑过频繁过多调用)
                             clearTimeout(timer);
                             timer = setTimeout(function() { 
                                 var pointAry = ($.grep(item.series.data, function(d, i) {
@@ -208,19 +225,19 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
                                 var point = {
                                     x: pointAry[0],
                                     y: pointAry[1],
-                                    c: item.series.color,
-                                    s: item.series.label,
-                                    d: pointAry[2]
+                                    color: item.series.color,
+                                    label: item.series.label,
+                                    data: pointAry[2]
                                 };
                                 //var offset = self.plot.pointOffset({x:point.x, y:point.y});
                                 var offset = {top:item.pageY, left:item.pageX};
 
-                                hoverin.apply(self, [offset, point]);
+                                hoverin.call(self, offset, point);
                             }, 150);
                         }
                     } else {
                         clearTimeout(timer);
-                        hoverout.apply(self);
+                        hoverout.call(self);
 
                         prevPoint = null;
                     }
@@ -229,7 +246,7 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
     };//}}}
 
     Graph.__config = {
-        base: {
+        base: { //和flot一致的配置
             series: {
                 lines: { show: true },
                 points: { show: true }
@@ -242,7 +259,7 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
                 mode: 'x'
             }
         },
-        ui: {
+        ui: { //ui相关配置(x、y轴说明，框选使用提示，回退按钮)
             back: {
                 content: '返回上一框选范围',
                 cls: ''
@@ -274,8 +291,8 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
         datapreprocess: function (data) { // function(data) {}
             return data;
         },  
-        datarangeselect: noop, // function(selectedData, range) {}
-        datapointhover: { // function(offset, point) {} offset:{x,y}, point:{x,y,color,data}
+        datarangeselect: noop, // function(selectedData) {}
+        datapointhover: { // function(offset, point) {} offset:{x,y}, point:{x,y,label,color,data}
             hoverin: noop,         
             hoverout: noop
         }
@@ -283,3 +300,36 @@ define(['jquery', 'lib/jquery.template', 'order!lib/flot/jquery.flot', 'order!li
 
     return Graph;
 });
+
+/*
+events = 
+{
+    datapreprocess: function (data) { //数据预处理(返回处理后数据)
+        // your preprocess
+        return data;
+    },
+    datarangeselect: function (selectData) { //鼠标框选范围
+        // your process
+        // selectData = [
+        //   { c: <color of point>, d: <data of point>, 
+        //     x: <x coordinate of point>, y: <y coordinate of point>, 
+        //     s: <label of point> }, (*)... ]
+    },
+    datapointhover: { //鼠标滑过数据点
+        hoverin: function (offset, point) {//滑入
+            // your process
+            // offset = { x: <x offset of point>, y: <y offset of point> }
+            // point = { c: <color of point>, d: <data of point>,
+            //   x: <x coordinate of point>, y: <y coordinate of point>,
+            //   s: <label of point> }
+        },
+        hoverout: function (offset, point) {//滑出
+            // your process
+            // offset = { x: <x offset of point>, y: <y offset of point> }
+            // point = { c: <color of point>, d: <data of point>,
+            //   x: <x coordinate of point>, y: <y coordinate of point>,
+            //   s: <label of point> }
+        }
+    }
+}
+*/

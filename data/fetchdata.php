@@ -80,8 +80,8 @@ ini_set("memory_limit", "64M");
 $dataGenerator = new DataGenerator();
 $data = array();
 
-//$data = $dataGenerator->generate($region, $type);
-//$data = $dataGenerator->generateByRegion("all");
+// $data = $dataGenerator->generate('all', 'char');
+// $data = $dataGenerator->generateByRegion("all");
 $data = $dataGenerator->generateAll();
 
 Ob_Start("ob_gzhandler");
