@@ -1,0 +1,1 @@
+define(function(){var f=null;var e=["ms","moz","webkit","o"];for(var h=0;h<e.length&&!f;++h){f=window[e[h]+"RequestAnimationFrame"]}var g=0;if(!f){f=function(d,b){var c=new Date().getTime(),a=Math.max(0,16-(c-g)),j=window.setTimeout(function(){d(c+a)},a);g=c+a;return j}}return f});
