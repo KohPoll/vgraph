@@ -8,12 +8,24 @@
     <link rel="stylesheet" href="css/vgraph-main.css" />
 
     <script src="js/require-jquery.js"></script>
-    <script>
-        require({
-            urlArgs: 't=' + (new Date()).getTime(),
-            baseUrl: 'js'
-        }, ['main']);
-    </script>
+
+<?php
+$env = $_GET['mode'];
+if ($env == 'dev') {
+    echo <<<EOB
+<script>
+    require({
+        urlArgs: 't=' + (new Date()).getTime(),
+        baseUrl: 'js'
+    }, ['main']);
+</script>
+EOB;
+} else {
+    echo <<<EOB
+<script>require({baseUrl: 'js'}, ['main']);</script>
+EOB;
+}
+?>
 
 	<!-- prefixfree lib -->
 	<script type="text/javascript" src="js/lib/prefixfree.min.js"></script>
@@ -37,11 +49,21 @@
         </div>
         
         <ul id="typeMenu">
-            <li class="t1"><button value="char">单字</button></li>
-            <li class="t2"><button value="ncword">词汇（无词性）</button></li>
-            <li class="t3"><button value="cword">词汇（有词性）</button></li>
-            <li class="t4"><button value="gram">语法点</button></li>
-            <li class="t5"><button value="cul">文化点</button></li>
+        <?php
+        $type = array(
+            "char" => "单字",
+            "ncword" => "词汇（无词性）",
+            "cword" => "词汇（有词性）",
+            "gram" => "语法点",
+            "cul" => "文化点"
+        );
+        $i = 1;
+
+        foreach ($type as $t => $tv) {
+            echo "<li class=\"t$i\"><button value=\"$t\">$tv</button></li>";
+            $i += 1;
+        }
+        ?>
         </ul>
 
         <div id="container">
@@ -49,11 +71,15 @@
                 <div id="placeHolder"></div>
 
                 <ul id="levelMenu">
-                    <li title="全图"><button value="0">全图</button></li>
-                    <li title="一级细节图"><button value="1">一级细节图</button></li>
-                    <li title="二级细节图"><button value="2">二级细节图</button></li>
-                    <li title="三级细节图"><button value="3">三级细节图</button></li>
-                    <li title="四级细节图"><button value="4">四级细节图</button></li>
+                <?php
+                $level = array("全图", "一级细节图", "二级细节图", "三级细节图", "四级细节图");
+                $i = 0;
+
+                foreach ($level as $l) {
+                    echo "<li title=\"$l\"><button value=\"$i\">$l</button></li>";
+                    $i += 1;
+                }
+                ?>
                 </ul>
             </div>
 
@@ -69,9 +95,7 @@
             </div>
 
             <br style="clear:both;" />
-
         </div>
     </div>
-
 </body>
 </html>

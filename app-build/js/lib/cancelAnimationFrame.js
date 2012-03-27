@@ -1,1 +1,1 @@
-define(function(){var f=null;var e=["ms","moz","webkit","o"];for(var h=0;h<e.length&&!f;++h){f=window[e[h]+"CancelAnimationFrame"]||window[e[h]+"CancelRequestAnimationFrame"]}var g=0;if(!f){f=function(a){clearTimeout(a)}}return f});
+define(function(){var c=null;var d=["ms","moz","webkit","o"];for(var a=0;a<d.length&&!c;++a){c=window[d[a]+"CancelAnimationFrame"]||window[d[a]+"CancelRequestAnimationFrame"]}var b=0;if(!c){c=function(e){clearTimeout(e)}}return c});
