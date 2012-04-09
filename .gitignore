@@ -8,7 +8,6 @@ vd/
 tmp/
 logs/
 .project
-build/
 .modified
 .code_swarm*
 *.orig
