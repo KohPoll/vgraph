@@ -1,3 +1,3 @@
-require(['jquery', 'cmt'], function($, Cmt) {
-    Cmt.init();
+require(['jquery', 'ctm'], function($, Ctm) {
+    Ctm.init();
 });

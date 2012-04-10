@@ -1,9 +1,9 @@
 define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'graph'], function ($, PubSub, Animator, Cube, TextParticle, Widget, Graph) {
 
-    var Cmt = {};
+    var Ctm = {};
 
     // 主初始函数
-    Cmt.init = function () {//{{{
+    Ctm.init = function () {//{{{
         // 初始化场景逻辑
         this.Scene.init();
 
@@ -15,7 +15,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
     };//}}}
 
     // 场景逻辑
-    Cmt.Scene = {//{{{
+    Ctm.Scene = {//{{{
         init: function () {
             this.painter = $('#painter'); //3d场景绘制画布
             this.content = $('#content'); //内容容器
@@ -47,12 +47,12 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
                 size: 200,
                 pos: [-10, -20, -10000],
                 rotSpeed: [1.8 * 0.005, 2.4 * 0.005, 0],
-                textures: Cmt.util.generateTextures('cube', 6, '.jpg')
+                textures: Ctm.util.generateTextures('cube', 6, '.jpg')
             });
             this.textParticle = new TextParticle({
                 scene: this.animator.scene,
                 amount: 31,
-                textures: Cmt.util.generateTextures('text', 31, '.png')
+                textures: Ctm.util.generateTextures('text', 31, '.png')
             });
             // 角色加入角色管理器
             this.animator.addActors([this.cube, this.textParticle]); 
@@ -126,7 +126,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
                 isCubeClicked = true;
 
                 // 更新指示当前区域的提示
-                regionInfo = Cmt.util.materialIndexToRegion[parseInt(data, 10)];
+                regionInfo = Ctm.util.materialIndexToRegion[parseInt(data, 10)];
                 sceneInfo.html(regionInfo.content); 
             });
 
@@ -182,14 +182,14 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
     };//}}}
 
     // 请求及处理/获取数据逻辑
-    Cmt.NetData = {//{{{
+    Ctm.NetData = {//{{{
         init: function () {
             // 取数据
             this.fetch();
         },
         fetch: function () {//{{{
             var self = this;
-            $.getJSON(Cmt.config.fetchUrl, function (data) {
+            $.getJSON(Ctm.config.fetchUrl, function (data) {
                 self.receivedData = data;
                 // format: { region: { type: [ label: '1级xx', data: [ [x, y, d], ... ] ], ... }, ... }
                 PubSub.publish('dataReceived');
@@ -245,7 +245,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
     };//}}}
 
     // 绘图及交互逻辑
-    Cmt.ViewGraph = {//{{{
+    Ctm.ViewGraph = {//{{{
         init: function () {
             //初始化Widget(tip,dataContainer,list)
             this.initWidget();
@@ -300,7 +300,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
                 },
                 events: {
                     datapreprocess: function (data) {
-                        var colors = Cmt.config.colors;
+                        var colors = Ctm.config.colors;
 
                         for (var i=0, len=data.length; i<len; ++i) {
                             var series = data[i];
@@ -364,7 +364,7 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
             //监听level button被按下的消息
             PubSub.subscribe('mouseClickLevelButton', function (topcis, data) {
                 // console.log(data);
-                var levelData = Cmt.NetData.getLevelData(region, type),
+                var levelData = Ctm.NetData.getLevelData(region, type),
                     which = parseInt(data, 10), //第几级
                     ranges = levelData[which],
                     renderData = graph.getRenderData(ranges[0], ranges[1]);
@@ -378,8 +378,8 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
             // 搜索按钮按下时
             PubSub.subscribe('mouseClickSearchButton', function (topics, data) {
                 // console.log(data);
-                var listData = Cmt.NetData.getListData(region, type),
-                    colors = Cmt.config.colors;
+                var listData = Ctm.NetData.getListData(region, type),
+                    colors = Ctm.config.colors;
 
                 for (var i=0, len=listData.length; i<len; ++i) {
                     //TODO: 改进搜索方式
@@ -447,8 +447,8 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
         },//}}}
         _render: function (region, type) {//{{{
             var graph = this.graph, list = this.list, dataContainer = this.dataContainer,
-                renderData = Cmt.NetData.getData(region, type), 
-                listData = Cmt.NetData.getListData(region, type);
+                renderData = Ctm.NetData.getData(region, type), 
+                listData = Ctm.NetData.getListData(region, type);
 
             // render 数据图
             setTimeout(function () {
@@ -471,16 +471,16 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
     };//}}}
 
     // 配置参数
-    Cmt.config = {//{{{
+    Ctm.config = {//{{{
         fetchUrl: 'data/fetchdata.php',
         textureUrl: 'image/textures/',
         colors: ['#e44323', '#3686cc', '#6caf24', '#806061']
     };//}}}
 
     // 工具集
-    Cmt.util = {//{{{
+    Ctm.util = {//{{{
         generateTextures: function (which, amount, ext) {
-            var textureUrl = Cmt.config.textureUrl,
+            var textureUrl = Ctm.config.textureUrl,
                 textures = [];
 
             for (var i=1; i<=amount; ++i) {
@@ -499,5 +499,5 @@ define(['jquery', 'lib/pubsub', 'animator', 'cube', 'textParticle', 'widget', 'g
         ]
     };//}}}
 
-    return Cmt;
+    return Ctm;
 });
