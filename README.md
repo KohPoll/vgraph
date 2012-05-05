@@ -11,6 +11,7 @@
 ##note: 
 * 由于一些原因，暂未提供数据文件(.csv)
 * 请在支持canvas的浏览器里查看(强烈推荐chrome)
+* 可以在这个[链接](http://my.ss.sysu.edu.cn:8888/ctm/)查看线上效果（不过线上代码是重构前版本）
 
 ##add feature:
 * url可以接受mode参数，如：http://localhost/vgraph/app/index.php?mode=dev，表示开发环境（请求js时会加上时间戳，避免被缓存）
